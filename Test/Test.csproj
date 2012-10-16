@@ -52,6 +52,10 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Extensions\Extensions.csproj">
+      <Project>{C0D2BE83-7B4D-45AE-84F0-757495AC4F46}</Project>
+      <Name>Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MapControl\MapControl.csproj">
       <Project>{975B3DEE-A3AF-4888-B509-CD7560D6CC59}</Project>
       <Name>MapControl</Name>

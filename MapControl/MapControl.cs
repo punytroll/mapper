@@ -63,6 +63,15 @@
             _MapProvider = null;
             _Tiles = new System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>();
             _Zoom = 0;
+            SetStyle(System.Windows.Forms.ControlStyles.UserPaint | System.Windows.Forms.ControlStyles.AllPaintingInWmPaint | System.Windows.Forms.ControlStyles.OptimizedDoubleBuffer, true);
+        }
+
+        /// <summary>
+        /// Calculates the location in geo coordinates from a location in screen coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetGeoLocationFromScreenLocation(System.Drawing.Point ScreenLocation)
+        {
+            return GetGeoLocationFromWorldLocation(GetWorldLocationFromScreenLocation(ScreenLocation));
         }
 
         /// <summary>
@@ -80,60 +89,26 @@
         {
             var Result = new System.Drawing.PointF();
 
-            Result.X = System.Convert.ToSingle(WorldLocationX * 360.0);
-            Result.Y = System.Convert.ToSingle(180.0 / System.Math.PI * System.Math.Atan(System.Math.Sinh(2.0 * System.Math.PI * WorldLocationY)));
+            Result.X = System.Convert.ToSingle(WorldLocationX * System.Math.PI * 2.0);
+            Result.Y = System.Convert.ToSingle(System.Math.Atan(System.Math.Sinh(2.0 * System.Math.PI * WorldLocationY)));
 
             return Result;
         }
 
         /// <summary>
-        /// Calculates the location in tile coordinates from a location in screen coordinates.
+        /// Calculates the location in pixel coordinates from a location in geo coordinates.
         /// </summary>
-        public System.Drawing.PointF GetTileLocationFromScreenLocation(System.Drawing.Point ScreenLocation)
+        public System.Drawing.Point GetPixelLocationFromGeoLocation(System.Drawing.PointF GeoLocation)
         {
-            return GetTileLocationFromPixelLocation(GetPixelLocationFromScreenLocation(ScreenLocation));
+            return GetPixelLocationFromWorldLocation(GetWorldLocationFromGeoLocation(GeoLocation));
         }
 
         /// <summary>
-        /// Calculates the location in tile coordinates from a location in screen coordinates.
+        /// Calculates the location in pixel coordinates from a location in geo coordinates.
         /// </summary>
-        public System.Drawing.PointF GetTileLocationFromScreenLocation(System.Int32 ScreenLocationX, System.Int32 ScreenLocationY)
+        public System.Drawing.Point GetPixelLocationFromGeoLocation(System.Single GeoLocationX, System.Single GeoLocationY)
         {
-            return GetTileLocationFromPixelLocation(GetPixelLocationFromScreenLocation(ScreenLocationX, ScreenLocationY));
-        }
-
-        /// <summary>
-        /// Calculates the location in tile coordinates from a location in pixel coordinates.
-        /// </summary>
-        public System.Drawing.PointF GetTileLocationFromPixelLocation(System.Drawing.Point PixelLocation)
-        {
-            return GetTileLocationFromPixelLocation(PixelLocation.X, PixelLocation.Y);
-        }
-
-        /// <summary>
-        /// Calculates the location in tile coordinates from a location in pixel coordinates.
-        /// </summary>
-        public System.Drawing.PointF GetTileLocationFromPixelLocation(System.Int32 PixelLocationX, System.Int32 PixelLocationY)
-        {
-            var Result = new System.Drawing.PointF();
-
-            Result.X = System.Convert.ToSingle(PixelLocationX) / System.Convert.ToSingle(_TileSize);
-            Result.Y = System.Convert.ToSingle(PixelLocationY) / System.Convert.ToSingle(_TileSize);
-
-            return Result;
-        }
-
-        /// <summary>
-        /// Calculates the location in tile coordinates from a location in world coordinates.
-        /// </summary>
-        public System.Drawing.PointF GetTileLocationFromWorldLocation(System.Single WorldLocationX, System.Single WorldLocationY)
-        {
-            var Result = new System.Drawing.PointF();
-
-            Result.X = (0.5f + WorldLocationX) * System.Convert.ToSingle(System.Math.Pow(2.0, _Zoom));
-            Result.Y = (0.5f - WorldLocationY) * System.Convert.ToSingle(System.Math.Pow(2.0, _Zoom));
-
-            return Result;
+            return GetPixelLocationFromWorldLocation(GetWorldLocationFromGeoLocation(GeoLocationX, GeoLocationY));
         }
 
         /// <summary>
@@ -173,9 +148,141 @@
         /// <summary>
         /// Calculates the location in pixel coordinates from a location in world coordinates.
         /// </summary>
+        public System.Drawing.Point GetPixelLocationFromWorldLocation(System.Drawing.PointF WorldLocation)
+        {
+            return GetPixelLocationFromTileLocation(GetTileLocationFromWorldLocation(WorldLocation));
+        }
+
+        /// <summary>
+        /// Calculates the location in pixel coordinates from a location in world coordinates.
+        /// </summary>
         public System.Drawing.Point GetPixelLocationFromWorldLocation(System.Single WorldLocationX, System.Single WorldLocationY)
         {
             return GetPixelLocationFromTileLocation(GetTileLocationFromWorldLocation(WorldLocationX, WorldLocationY));
+        }
+
+        /// <summary>
+        /// Calculates the location in screen coordinates from a location in geo coordinates.
+        /// </summary>
+        public System.Drawing.Point GetScreenLocationFromGeoLocation(System.Drawing.PointF GeoLocation)
+        {
+            return GetScreenLocationFromPixelLocation(GetPixelLocationFromGeoLocation(GeoLocation));
+        }
+
+        /// <summary>
+        /// Calculates the location in screen coordinates from a location in geo coordinates.
+        /// </summary>
+        public System.Drawing.Point GetScreenLocationFromGeoLocation(System.Single GeoLocationX, System.Single GeoLocationY)
+        {
+            return GetScreenLocationFromPixelLocation(GetPixelLocationFromGeoLocation(GeoLocationX, GeoLocationY));
+        }
+
+        /// <summary>
+        /// Calculates the location in screen coordinates from a location in geo coordinates.
+        /// </summary>
+        public System.Drawing.Point GetScreenLocationFromPixelLocation(System.Drawing.Point PixelLocation)
+        {
+            var Result = new System.Drawing.Point();
+
+            Result.X = PixelLocation.X + _TranslateX;
+            Result.Y = PixelLocation.Y + _TranslateY;
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Calculates the location in tile coordinates from a location in pixel coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetTileLocationFromPixelLocation(System.Drawing.Point PixelLocation)
+        {
+            return GetTileLocationFromPixelLocation(PixelLocation.X, PixelLocation.Y);
+        }
+
+        /// <summary>
+        /// Calculates the location in tile coordinates from a location in pixel coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetTileLocationFromPixelLocation(System.Int32 PixelLocationX, System.Int32 PixelLocationY)
+        {
+            var Result = new System.Drawing.PointF();
+
+            Result.X = System.Convert.ToSingle(PixelLocationX) / System.Convert.ToSingle(_TileSize);
+            Result.Y = System.Convert.ToSingle(PixelLocationY) / System.Convert.ToSingle(_TileSize);
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Calculates the location in tile coordinates from a location in screen coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetTileLocationFromScreenLocation(System.Drawing.Point ScreenLocation)
+        {
+            return GetTileLocationFromPixelLocation(GetPixelLocationFromScreenLocation(ScreenLocation));
+        }
+
+        /// <summary>
+        /// Calculates the location in tile coordinates from a location in screen coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetTileLocationFromScreenLocation(System.Int32 ScreenLocationX, System.Int32 ScreenLocationY)
+        {
+            return GetTileLocationFromPixelLocation(GetPixelLocationFromScreenLocation(ScreenLocationX, ScreenLocationY));
+        }
+
+        /// <summary>
+        /// Calculates the location in tile coordinates from a location in world coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetTileLocationFromWorldLocation(System.Drawing.PointF WorldLocation)
+        {
+            return GetTileLocationFromWorldLocation(WorldLocation.X, WorldLocation.Y);
+        }
+
+        /// <summary>
+        /// Calculates the location in tile coordinates from a location in world coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetTileLocationFromWorldLocation(System.Single WorldLocationX, System.Single WorldLocationY)
+        {
+            var Result = new System.Drawing.PointF();
+
+            Result.X = (0.5f + WorldLocationX) * System.Convert.ToSingle(System.Math.Pow(2.0, _Zoom));
+            Result.Y = (0.5f - WorldLocationY) * System.Convert.ToSingle(System.Math.Pow(2.0, _Zoom));
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Calculates the location in world coordinates from a location in geo coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetWorldLocationFromGeoLocation(System.Drawing.PointF GeoLocation)
+        {
+            return GetWorldLocationFromGeoLocation(GeoLocation.X, GeoLocation.Y);
+        }
+
+        /// <summary>
+        /// Calculates the location in world coordinates from a location in geo coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetWorldLocationFromGeoLocation(System.Single GeoLocationX, System.Single GeoLocationY)
+        {
+            var Result = new System.Drawing.PointF();
+
+            Result.X = System.Convert.ToSingle(GeoLocationX / 2.0 / System.Math.PI);
+            Result.Y = System.Convert.ToSingle((Math.Log(Math.Tan(GeoLocationY) + 1.0 / Math.Cos(GeoLocationY)) / Math.PI) / 2.0);
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Calculates the location in world coordinates from a location in screen coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetWorldLocationFromScreenLocation(System.Int32 ScreenLocationX, System.Int32 ScreenLocationY)
+        {
+            return GetWorldLocationFromTileLocation(GetTileLocationFromScreenLocation(ScreenLocationX, ScreenLocationY));
+        }
+
+        /// <summary>
+        /// Calculates the location in world coordinates from a location in screen coordinates.
+        /// </summary>
+        public System.Drawing.PointF GetWorldLocationFromScreenLocation(System.Drawing.Point ScreenLocation)
+        {
+            return GetWorldLocationFromTileLocation(GetTileLocationFromScreenLocation(ScreenLocation));
         }
 
         /// <summary>
@@ -197,22 +304,6 @@
             Result.Y = System.Convert.ToSingle(0.5 - TileLocationY / System.Math.Pow(2.0, _Zoom));
 
             return Result;
-        }
-
-        /// <summary>
-        /// Calculates the location in world coordinates from a location in screen coordinates.
-        /// </summary>
-        public System.Drawing.PointF GetWorldLocationFromScreenLocation(System.Int32 ScreenLocationX, System.Int32 ScreenLocationY)
-        {
-            return GetWorldLocationFromTileLocation(GetTileLocationFromScreenLocation(ScreenLocationX, ScreenLocationY));
-        }
-
-        /// <summary>
-        /// Calculates the location in world coordinates from a location in screen coordinates.
-        /// </summary>
-        public System.Drawing.PointF GetWorldLocationFromScreenLocation(System.Drawing.Point ScreenLocation)
-        {
-            return GetWorldLocationFromTileLocation(GetTileLocationFromScreenLocation(ScreenLocation));
         }
 
         public void SetZoom(System.Int32 Zoom)
@@ -258,28 +349,17 @@
                         {
                             Tile = _Tiles[Position];
                         }
-                        switch(Tile.Status)
+                        if(Tile.Image != null)
                         {
-                        case System.Windows.Forms.MapTile.ImageStatus.Available:
-                            {
-                                EventArguments.Graphics.DrawImageUnscaled(_Tiles[Position].Image, X * 256 + _TranslateX, Y * 256 + _TranslateY);
-
-                                break;
-                            }
-                        case System.Windows.Forms.MapTile.ImageStatus.Fetching:
-                            {
-                                Tile.StatusChanged += () => Invalidate(new System.Drawing.Rectangle(Tile.X * 256 + _TranslateX, Tile.Y * 256 + _TranslateY, 256, 256));
-
-                                break;
-                            }
+                            EventArguments.Graphics.DrawImageUnscaled(Tile.Image, X * 256 + _TranslateX, Y * 256 + _TranslateY);
+                        }
+                        else
+                        {
+                            Tile.ImageChanged += () => Invoke(new MethodInvoker(Invalidate));
                         }
                     }
                 }
             }
-
-            //var Random = new System.Random();
-
-            //EventArguments.Graphics.FillRectangle(new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(Random.Next(256), Random.Next(256), Random.Next(256))), EventArguments.ClipRectangle);
         }
     }
 }

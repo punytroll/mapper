@@ -9,6 +9,7 @@
         private System.Windows.Forms.Label _ScreenLocationLabel;
         private System.Windows.Forms.Label _PixelLocationLabel;
         private System.Windows.Forms.Label _GeoLocationLabel;
+        private System.Windows.Forms.Label _GeoCoordinatesLabel;
         private System.Drawing.Point? _MapControlDragPoint;
 
         public MainWindow()
@@ -28,12 +29,13 @@
             System.Windows.Forms.Button _TranslateLeftButton;
             System.Windows.Forms.Button _TranslateRightButton;
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this._GeoLocationLabel = new System.Windows.Forms.Label();
             this._PixelLocationLabel = new System.Windows.Forms.Label();
             this._ScreenLocationLabel = new System.Windows.Forms.Label();
             this._TileLocationLabel = new System.Windows.Forms.Label();
             this._WorldLocationLabel = new System.Windows.Forms.Label();
             this._MapControl = new System.Windows.Forms.MapControl();
-            this._GeoLocationLabel = new System.Windows.Forms.Label();
+            this._GeoCoordinatesLabel = new System.Windows.Forms.Label();
             _ZoomInButton = new System.Windows.Forms.Button();
             _ZoomOutButton = new System.Windows.Forms.Button();
             _TranslateUpButton = new System.Windows.Forms.Button();
@@ -115,6 +117,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this._GeoCoordinatesLabel);
             this.splitContainer1.Panel1.Controls.Add(this._GeoLocationLabel);
             this.splitContainer1.Panel1.Controls.Add(this._PixelLocationLabel);
             this.splitContainer1.Panel1.Controls.Add(this._ScreenLocationLabel);
@@ -134,10 +137,20 @@
             this.splitContainer1.SplitterDistance = 200;
             this.splitContainer1.TabIndex = 2;
             // 
+            // _GeoLocationLabel
+            // 
+            this._GeoLocationLabel.AutoSize = true;
+            this._GeoLocationLabel.Location = new System.Drawing.Point(13, 481);
+            this._GeoLocationLabel.Margin = new System.Windows.Forms.Padding(3);
+            this._GeoLocationLabel.Name = "_GeoLocationLabel";
+            this._GeoLocationLabel.Size = new System.Drawing.Size(68, 13);
+            this._GeoLocationLabel.TabIndex = 10;
+            this._GeoLocationLabel.Text = "GeoLocation";
+            // 
             // _PixelLocationLabel
             // 
             this._PixelLocationLabel.AutoSize = true;
-            this._PixelLocationLabel.Location = new System.Drawing.Point(12, 439);
+            this._PixelLocationLabel.Location = new System.Drawing.Point(12, 423);
             this._PixelLocationLabel.Margin = new System.Windows.Forms.Padding(3);
             this._PixelLocationLabel.Name = "_PixelLocationLabel";
             this._PixelLocationLabel.Size = new System.Drawing.Size(70, 13);
@@ -147,7 +160,7 @@
             // _ScreenLocationLabel
             // 
             this._ScreenLocationLabel.AutoSize = true;
-            this._ScreenLocationLabel.Location = new System.Drawing.Point(12, 420);
+            this._ScreenLocationLabel.Location = new System.Drawing.Point(12, 404);
             this._ScreenLocationLabel.Margin = new System.Windows.Forms.Padding(3);
             this._ScreenLocationLabel.Name = "_ScreenLocationLabel";
             this._ScreenLocationLabel.Size = new System.Drawing.Size(82, 13);
@@ -157,7 +170,7 @@
             // _TileLocationLabel
             // 
             this._TileLocationLabel.AutoSize = true;
-            this._TileLocationLabel.Location = new System.Drawing.Point(12, 477);
+            this._TileLocationLabel.Location = new System.Drawing.Point(12, 461);
             this._TileLocationLabel.Margin = new System.Windows.Forms.Padding(3);
             this._TileLocationLabel.Name = "_TileLocationLabel";
             this._TileLocationLabel.Size = new System.Drawing.Size(65, 13);
@@ -167,7 +180,7 @@
             // _WorldLocationLabel
             // 
             this._WorldLocationLabel.AutoSize = true;
-            this._WorldLocationLabel.Location = new System.Drawing.Point(12, 458);
+            this._WorldLocationLabel.Location = new System.Drawing.Point(12, 442);
             this._WorldLocationLabel.Margin = new System.Windows.Forms.Padding(3);
             this._WorldLocationLabel.Name = "_WorldLocationLabel";
             this._WorldLocationLabel.Size = new System.Drawing.Size(76, 13);
@@ -176,7 +189,7 @@
             // 
             // _MapControl
             // 
-            this._MapControl.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this._MapControl.BackColor = System.Drawing.SystemColors.ControlDark;
             this._MapControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this._MapControl.Location = new System.Drawing.Point(0, 0);
             this._MapControl.MapProvider = null;
@@ -190,15 +203,15 @@
             this._MapControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseDown);
             this._MapControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseUp);
             // 
-            // _GeoLocationLabel
+            // _GeoCoordinatesLabel
             // 
-            this._GeoLocationLabel.AutoSize = true;
-            this._GeoLocationLabel.Location = new System.Drawing.Point(13, 497);
-            this._GeoLocationLabel.Margin = new System.Windows.Forms.Padding(3);
-            this._GeoLocationLabel.Name = "_GeoLocationLabel";
-            this._GeoLocationLabel.Size = new System.Drawing.Size(68, 13);
-            this._GeoLocationLabel.TabIndex = 10;
-            this._GeoLocationLabel.Text = "GeoLocation";
+            this._GeoCoordinatesLabel.AutoSize = true;
+            this._GeoCoordinatesLabel.Location = new System.Drawing.Point(13, 500);
+            this._GeoCoordinatesLabel.Margin = new System.Windows.Forms.Padding(3);
+            this._GeoCoordinatesLabel.Name = "_GeoCoordinatesLabel";
+            this._GeoCoordinatesLabel.Size = new System.Drawing.Size(68, 13);
+            this._GeoCoordinatesLabel.TabIndex = 11;
+            this._GeoCoordinatesLabel.Text = "GeoLocation";
             // 
             // MainWindow
             // 
@@ -260,15 +273,24 @@
 
             _WorldLocationLabel.Text = "World: " + WorldLocation.X + " / " + WorldLocation.Y;
 
-            var GeoLocation = _MapControl.GetGeoLocationFromWorldLocation(WorldLocation);
+            var GeoLocation = _MapControl.GetGeoLocationFromScreenLocation(EventArguments.Location);
 
             _GeoLocationLabel.Text = "Geo: " + GeoLocation.X + " / " + GeoLocation.Y;
+            _GeoCoordinatesLabel.Text = "Coordinates: " + _GetGeoCoordinates(GeoLocation);
             if(_MapControlDragPoint != null)
             {
                 _MapControl.TranslateX += EventArguments.X - _MapControlDragPoint.Value.X;
                 _MapControl.TranslateY += EventArguments.Y - _MapControlDragPoint.Value.Y;
                 _MapControlDragPoint = EventArguments.Location;
             }
+        }
+
+        private static System.String _GetGeoCoordinates(System.Drawing.PointF GeoLocation)
+        {
+            var Longitude = GeoLocation.X * 180.0 / System.Math.PI;
+            var Latitude = GeoLocation.Y * 180.0 / System.Math.PI;
+
+            return Latitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Latitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Latitude > 0) ? ("N") : ("S")) + ", " + Longitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Longitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Longitude > 0) ? ("O") : ("W"));
         }
 
         private void _OnMapControlMouseWheel(System.Object Sender, System.Windows.Forms.MouseEventArgs EventArguments)
