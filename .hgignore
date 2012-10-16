@@ -1,0 +1,6 @@
+syntax: glob
+_ReSharper*
+syntax: regexp
+.*/bin/.*
+.*/obj/.*
+MapControl.suo
