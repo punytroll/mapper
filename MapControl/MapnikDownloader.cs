@@ -4,13 +4,9 @@
     {
         private const System.String _TileFormat = "http://tile.openstreetmap.org/{0}/{1}/{2}.png";
 
-        protected override System.Windows.Forms.MapTile _GetTile(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
+        protected override void _FetchTile(System.Windows.Forms.MapTile Tile)
         {
-            var Result = new MapTile(Zoom, X, Y);
-
-            System.Threading.ThreadPool.QueueUserWorkItem(_DownloadTile, Result);
-
-            return Result;
+            System.Threading.ThreadPool.QueueUserWorkItem(_DownloadTile, Tile);
         }
 
         private static void _DownloadTile(System.Object Parameter)
@@ -34,7 +30,7 @@
                     }
                 }
             }
-            catch(System.Net.WebException Exception)
+            catch(System.Net.WebException)
             {
                 Tile.SetImage(null);
             }
