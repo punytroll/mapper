@@ -9,6 +9,11 @@
             System.Threading.ThreadPool.QueueUserWorkItem(_DownloadTile, Tile);
         }
 
+        public override System.Int32 GetTileSize()
+        {
+            return 256;
+        }
+
         private static void _DownloadTile(System.Object Parameter)
         {
             var Tile = (System.Windows.Forms.MapTile)Parameter;

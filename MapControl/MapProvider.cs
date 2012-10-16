@@ -9,6 +9,16 @@
             _Cache = new System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>>();
         }
 
+        public System.Boolean HasTile(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
+        {
+            return (_Cache.ContainsKey(Zoom) == true) && (_Cache[Zoom].ContainsKey(new System.Drawing.Point(X, Y)) == true);
+        }
+
+        public System.Boolean HasImage(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
+        {
+            return (_Cache.ContainsKey(Zoom) == true) && (_Cache[Zoom].ContainsKey(new System.Drawing.Point(X, Y)) == true) && (_Cache[Zoom][new System.Drawing.Point(X, Y)].Image != null);
+        }
+
         public System.Windows.Forms.MapTile GetTile(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
         {
             System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile> CacheForZoom;
@@ -42,5 +52,6 @@
         }
 
         protected abstract void _FetchTile(System.Windows.Forms.MapTile Tile);
+        public abstract System.Int32 GetTileSize();
     }
 }

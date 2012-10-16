@@ -1,11 +1,8 @@
 ﻿namespace System.Windows.Forms
 {
-    public class MapControl : System.Windows.Forms.Control
+    public class Map : System.Windows.Forms.Control
     {
-        private const System.Int32 _TileSize = 256;
-
         private System.Windows.Forms.MapProvider _MapProvider;
-        private readonly System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile> _Tiles;
         private System.Int32 _TranslateX;
         private System.Int32 _TranslateY;
         private System.Int32 _Zoom;
@@ -19,7 +16,6 @@
             set
             {
                 _MapProvider = value;
-                _Tiles.Clear();
                 Refresh();
             }
         }
@@ -58,10 +54,9 @@
             }
         }
 
-        public MapControl()
+        public Map()
         {
             _MapProvider = null;
-            _Tiles = new System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>();
             _Zoom = 0;
             SetStyle(System.Windows.Forms.ControlStyles.UserPaint | System.Windows.Forms.ControlStyles.AllPaintingInWmPaint | System.Windows.Forms.ControlStyles.OptimizedDoubleBuffer, true);
         }
@@ -139,8 +134,11 @@
         {
             var Result = new System.Drawing.Point();
 
-            Result.X = System.Convert.ToInt32(TileLocation.X * _TileSize);
-            Result.Y = System.Convert.ToInt32(TileLocation.Y * _TileSize);
+            if(_MapProvider != null)
+            {
+                Result.X = System.Convert.ToInt32(TileLocation.X * _MapProvider.GetTileSize());
+                Result.Y = System.Convert.ToInt32(TileLocation.Y * _MapProvider.GetTileSize());
+            }
 
             return Result;
         }
@@ -205,8 +203,11 @@
         {
             var Result = new System.Drawing.PointF();
 
-            Result.X = System.Convert.ToSingle(PixelLocationX) / System.Convert.ToSingle(_TileSize);
-            Result.Y = System.Convert.ToSingle(PixelLocationY) / System.Convert.ToSingle(_TileSize);
+            if(_MapProvider != null)
+            {
+                Result.X = System.Convert.ToSingle(PixelLocationX) / System.Convert.ToSingle(_MapProvider.GetTileSize());
+                Result.Y = System.Convert.ToSingle(PixelLocationY) / System.Convert.ToSingle(_MapProvider.GetTileSize());
+            }
 
             return Result;
         }
@@ -323,9 +324,13 @@
 
                 _TranslateX = X - NewCenter.X;
                 _TranslateY = Y - NewCenter.Y;
-                _Tiles.Clear();
                 Refresh();
             }
+        }
+
+        public System.Drawing.PointF GetGeoLocationFromGeoCoordinates(System.Single Latitude, System.Single Longitude)
+        {
+            return new System.Drawing.PointF(System.Convert.ToSingle(Longitude / 180.0 * System.Math.PI), System.Convert.ToSingle(Latitude / 180.0 * System.Math.PI));
         }
 
         protected override void OnPaint(System.Windows.Forms.PaintEventArgs EventArguments)
@@ -333,25 +338,15 @@
             base.OnPaint(EventArguments);
             if(_MapProvider != null)
             {
-                for(var X = -_TranslateX / _TileSize; X * _TileSize < Width - _TranslateX; ++X)
+                for(var X = -_TranslateX / _MapProvider.GetTileSize(); X * _MapProvider.GetTileSize() < Width - _TranslateX; ++X)
                 {
-                    for(var Y = -_TranslateY / _TileSize; Y * _TileSize < Width - _TranslateY; ++Y)
+                    for(var Y = -_TranslateY / _MapProvider.GetTileSize(); Y * _MapProvider.GetTileSize() < Width - _TranslateY; ++Y)
                     {
-                        var Position = new System.Drawing.Point(X, Y);
-                        System.Windows.Forms.MapTile Tile;
-
-                        if(_Tiles.ContainsKey(Position) == false)
-                        {
-                            Tile = _MapProvider.GetTile(_Zoom, X, Y);
-                            _Tiles[Position] = Tile;
-                        }
-                        else
-                        {
-                            Tile = _Tiles[Position];
-                        }
+                        var Tile = _MapProvider.GetTile(_Zoom, X, Y);
+                        
                         if(Tile.Image != null)
                         {
-                            EventArguments.Graphics.DrawImageUnscaled(Tile.Image, X * 256 + _TranslateX, Y * 256 + _TranslateY);
+                            EventArguments.Graphics.DrawImageUnscaled(Tile.Image, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY);
                         }
                         else
                         {

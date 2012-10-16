@@ -41,7 +41,13 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="MapControl.cs">
+    <Compile Include="DataMap.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DebugCacheMap.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Map.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MapnikDownloader.cs" />
