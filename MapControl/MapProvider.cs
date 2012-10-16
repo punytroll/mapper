@@ -2,7 +2,7 @@
 {
     public abstract class MapProvider
     {
-        private System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>> _Cache;
+        private readonly System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>> _Cache;
 
         protected MapProvider()
         {
@@ -27,9 +27,11 @@
 
             if(CacheForZoom.ContainsKey(TileIndex) == false)
             {
-                var Tile = _GetTile(Zoom, X, Y);
+                var Tile = new System.Windows.Forms.MapTile(Zoom, X, Y);
 
                 CacheForZoom.Add(TileIndex, Tile);
+                // here, a preliminary tile image could be calculated from other zoom levels
+                _FetchTile(Tile);
 
                 return Tile;
             }
@@ -39,6 +41,6 @@
             }
         }
 
-        protected abstract System.Windows.Forms.MapTile _GetTile(System.Int32 Zoom, System.Int32 X, System.Int32 Y);
+        protected abstract void _FetchTile(System.Windows.Forms.MapTile Tile);
     }
 }
