@@ -42,6 +42,7 @@
   -->
   <ItemGroup>
     <Compile Include="System.Double.cs" />
+    <Compile Include="System.Single.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core">
