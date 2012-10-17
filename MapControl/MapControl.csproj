@@ -67,7 +67,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Extensions\Common.csproj">
+    <ProjectReference Include="..\Common\Common.csproj">
       <Project>{C0D2BE83-7B4D-45AE-84F0-757495AC4F46}</Project>
       <Name>Common</Name>
     </ProjectReference>

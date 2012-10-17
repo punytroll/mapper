@@ -1,8 +1,4 @@
-﻿using System.Drawing;
-using System.IO;
-using System.Windows.Forms;
-
-namespace Test
+﻿namespace Mapper
 {
     internal class MainWindow : System.Windows.Forms.Form
     {
@@ -57,15 +53,26 @@ namespace Test
             this._CoordinatesLabel.Size = new System.Drawing.Size(71, 17);
             this._CoordinatesLabel.Text = "Coordinates";
             // 
+            // _OpenButton
+            // 
+            _OpenButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            _OpenButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            _OpenButton.Name = "_OpenButton";
+            _OpenButton.Size = new System.Drawing.Size(40, 22);
+            _OpenButton.Text = "Open";
+            _OpenButton.Click += new System.EventHandler(this._OnOpenButtonClicked);
+            // 
             // _Map
             // 
+            this._Map.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this._Map.BackColor = System.Drawing.SystemColors.ControlDark;
-            this._Map.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._Map.Location = new System.Drawing.Point(0, 0);
+            this._Map.Location = new System.Drawing.Point(0, 25);
             this._Map.MapProvider = null;
             this._Map.Margin = new System.Windows.Forms.Padding(0);
             this._Map.Name = "_Map";
-            this._Map.Size = new System.Drawing.Size(844, 508);
+            this._Map.Size = new System.Drawing.Size(844, 483);
             this._Map.TabIndex = 4;
             this._Map.TranslateX = 0;
             this._Map.TranslateY = 0;
@@ -83,15 +90,6 @@ namespace Test
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // _OpenButton
-            // 
-            _OpenButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            _OpenButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            _OpenButton.Name = "_OpenButton";
-            _OpenButton.Size = new System.Drawing.Size(40, 22);
-            _OpenButton.Text = "Open";
-            _OpenButton.Click += new System.EventHandler(this._OnOpenButtonClicked);
-            // 
             // MainWindow
             // 
             this.ClientSize = new System.Drawing.Size(844, 530);
@@ -99,7 +97,8 @@ namespace Test
             this.Controls.Add(this._Map);
             this.Controls.Add(_StatusBar);
             this.Name = "MainWindow";
-            this.Load += new System.EventHandler(this._OnMainWindowLoaded);
+            this.Text = "Mapper";
+            this.Load += new System.EventHandler(this._OnLoaded);
             _StatusBar.ResumeLayout(false);
             _StatusBar.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -111,9 +110,14 @@ namespace Test
 
         private void _OnMapControlMouseMoved(System.Object Sender, System.Windows.Forms.MouseEventArgs EventArguments)
         {
-            var GeoLocation = _Map.GetGeoLocationFromScreenLocation(EventArguments.Location);
-
-            _CoordinatesLabel.Text = _GetGeoCoordinates(GeoLocation);
+            if(_Map.IsScreenLocationInMap(EventArguments.Location) == true)
+            {
+                _UpdateCoordinatesLabel(_Map.GetGeoLocationFromScreenLocation(EventArguments.Location));
+            }
+            else
+            {
+                _UpdateCoordinatesLabel();
+            }
             if(_MapControlDragPoint != null)
             {
                 _Map.TranslateX += EventArguments.X - _MapControlDragPoint.Value.X;
@@ -122,25 +126,17 @@ namespace Test
             }
         }
 
-        private static System.String _GetGeoCoordinates(System.Point GeoLocation)
-        {
-            var Longitude = GeoLocation.X * 180.0 / System.Math.PI;
-            var Latitude = GeoLocation.Y * 180.0 / System.Math.PI;
-
-            return Latitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Latitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Latitude > 0) ? ("N") : ("S")) + ", " + Longitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Longitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Longitude > 0) ? ("O") : ("W"));
-        }
-
         private void _OnMouseWheel(System.Object Sender, System.Windows.Forms.MouseEventArgs EventArguments)
         {
             var MapControlPoint = _Map.PointToClient(PointToScreen(EventArguments.Location));
 
             _Map.SetZoom(_Map.Zoom + EventArguments.Delta / 120, MapControlPoint.X, MapControlPoint.Y);
-            _ZoomLabel.Text = "Zoom: " + _Map.Zoom;
+            _UpdateZoomLabel();
         }
 
         private void _OnMapControlMouseDown(System.Object Sender, System.Windows.Forms.MouseEventArgs EventArguments)
         {
-            if(EventArguments.Button == System.Windows.Forms.MouseButtons.Middle)
+            if(EventArguments.Button == System.Windows.Forms.MouseButtons.Left)
             {
                 _Map.Capture = true;
                 _MapControlDragPoint = EventArguments.Location;
@@ -149,26 +145,28 @@ namespace Test
 
         private void _OnMapControlMouseUp(System.Object Sender, System.Windows.Forms.MouseEventArgs EventArguments)
         {
-            if(EventArguments.Button == System.Windows.Forms.MouseButtons.Middle)
+            if(EventArguments.Button == System.Windows.Forms.MouseButtons.Left)
             {
                 _Map.Capture = false;
                 _MapControlDragPoint = null;
             }
         }
 
-        private void _OnMainWindowLoaded(System.Object Sender, System.EventArgs EventArguments)
+        private void _OnLoaded(System.Object Sender, System.EventArgs EventArguments)
         {
             _Map.TranslateX = _Map.Width / 2 - 128;
             _Map.TranslateY = _Map.Height / 2 - 128;
+            _UpdateZoomLabel();
+            _UpdateCoordinatesLabel(new System.Point(0.0, 0.0));
         }
 
         private void _OnOpenButtonClicked(System.Object Sender, System.EventArgs EventArguments)
         {
             var OpenFileDialog = new System.Windows.Forms.OpenFileDialog();
 
-            if(OpenFileDialog.ShowDialog() == DialogResult.OK)
+            if(OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                using(var Stream = new System.IO.FileStream(OpenFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using(var Stream = new System.IO.FileStream(OpenFileDialog.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
                 {
                     var GPX = GPS.GPX.DOM10.GPX.ReadFromStream(Stream);
 
@@ -185,6 +183,29 @@ namespace Test
                 }
                 _Map.Refresh();
             }
+        }
+
+        private void _UpdateZoomLabel()
+        {
+            _ZoomLabel.Text = "Zoom: " + _Map.Zoom;
+        }
+
+        private void _UpdateCoordinatesLabel()
+        {
+            _CoordinatesLabel.Text = "";
+        }
+
+        private void _UpdateCoordinatesLabel(System.Point GeoLocation)
+        {
+            _CoordinatesLabel.Text = _GetGeoCoordinates(GeoLocation);
+        }
+
+        private static System.String _GetGeoCoordinates(System.Point GeoLocation)
+        {
+            var Longitude = GeoLocation.X * 180.0 / System.Math.PI;
+            var Latitude = GeoLocation.Y * 180.0 / System.Math.PI;
+
+            return Latitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Latitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Latitude > 0) ? ("N") : ("S")) + ", " + Longitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Longitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Longitude > 0) ? ("O") : ("W"));
         }
     }
 }
