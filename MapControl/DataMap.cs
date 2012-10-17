@@ -2,14 +2,34 @@
 {
     public class DataMap : System.Windows.Forms.Map
     {
+        private readonly System.Collections.Generic.List<System.Point> _Points;
+
+        public System.Collections.Generic.List<System.Point> Points
+        {
+            get
+            {
+                return _Points;
+            }
+        }
+
+        public DataMap()
+        {
+            _Points = new System.Collections.Generic.List<System.Point>();
+        }
+
         protected override void OnPaint(System.Windows.Forms.PaintEventArgs EventArguments)
         {
             base.OnPaint(EventArguments);
 
-            var GeoLocation = GetGeoLocationFromGeoCoordinates(52.518611f, 13.408056f);
-            var ScreenLocation = GetScreenLocationFromGeoLocation(GeoLocation);
+            foreach(var GeoLocation in _Points)
+            {
+                var ScreenLocation = GetScreenLocationFromGeoLocation(GeoLocation);
 
-            EventArguments.Graphics.FillRectangle(System.Drawing.Brushes.OrangeRed, ScreenLocation.X - 2, ScreenLocation.Y - 2, 5, 5);
+                if((ScreenLocation.X >= 0) && (ScreenLocation.Y >= 0) && (ScreenLocation.X <= Width) && (ScreenLocation.Y <= Height))
+                {
+                    EventArguments.Graphics.FillRectangle(System.Drawing.Brushes.OrangeRed, ScreenLocation.X - 2, ScreenLocation.Y - 2, 5, 5);
+                }
+            }
         }
     }
 }

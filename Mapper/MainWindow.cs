@@ -1,10 +1,15 @@
-﻿namespace Test
+﻿using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
+
+namespace Test
 {
     internal class MainWindow : System.Windows.Forms.Form
     {
         private System.Windows.Forms.ToolStripStatusLabel _CoordinatesLabel;
         private System.Windows.Forms.DataMap _Map;
         private System.Windows.Forms.ToolStripStatusLabel _ZoomLabel;
+        private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Drawing.Point? _MapControlDragPoint;
 
         public MainWindow()
@@ -18,11 +23,15 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.StatusStrip _StatusBar;
+            System.Windows.Forms.ToolStripButton _OpenButton;
+            this._ZoomLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._CoordinatesLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._Map = new System.Windows.Forms.DataMap();
-            this._ZoomLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             _StatusBar = new System.Windows.Forms.StatusStrip();
+            _OpenButton = new System.Windows.Forms.ToolStripButton();
             _StatusBar.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // _StatusBar
@@ -35,6 +44,12 @@
             _StatusBar.Size = new System.Drawing.Size(844, 22);
             _StatusBar.TabIndex = 3;
             _StatusBar.Text = "statusStrip1";
+            // 
+            // _ZoomLabel
+            // 
+            this._ZoomLabel.Name = "_ZoomLabel";
+            this._ZoomLabel.Size = new System.Drawing.Size(59, 17);
+            this._ZoomLabel.Text = "Zoom: XX";
             // 
             // _CoordinatesLabel
             // 
@@ -58,21 +73,37 @@
             this._Map.MouseDown += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseDown);
             this._Map.MouseUp += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseUp);
             // 
-            // _ZoomLabel
+            // toolStrip1
             // 
-            this._ZoomLabel.Name = "_ZoomLabel";
-            this._ZoomLabel.Size = new System.Drawing.Size(59, 17);
-            this._ZoomLabel.Text = "Zoom: XX";
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            _OpenButton});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(844, 25);
+            this.toolStrip1.TabIndex = 5;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // _OpenButton
+            // 
+            _OpenButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            _OpenButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            _OpenButton.Name = "_OpenButton";
+            _OpenButton.Size = new System.Drawing.Size(40, 22);
+            _OpenButton.Text = "Open";
+            _OpenButton.Click += new System.EventHandler(this._OnOpenButtonClicked);
             // 
             // MainWindow
             // 
             this.ClientSize = new System.Drawing.Size(844, 530);
+            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this._Map);
             this.Controls.Add(_StatusBar);
             this.Name = "MainWindow";
             this.Load += new System.EventHandler(this._OnMainWindowLoaded);
             _StatusBar.ResumeLayout(false);
             _StatusBar.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -91,7 +122,7 @@
             }
         }
 
-        private static System.String _GetGeoCoordinates(System.Drawing.PointF GeoLocation)
+        private static System.String _GetGeoCoordinates(System.Point GeoLocation)
         {
             var Longitude = GeoLocation.X * 180.0 / System.Math.PI;
             var Latitude = GeoLocation.Y * 180.0 / System.Math.PI;
@@ -129,6 +160,31 @@
         {
             _Map.TranslateX = _Map.Width / 2 - 128;
             _Map.TranslateY = _Map.Height / 2 - 128;
+        }
+
+        private void _OnOpenButtonClicked(System.Object Sender, System.EventArgs EventArguments)
+        {
+            var OpenFileDialog = new System.Windows.Forms.OpenFileDialog();
+
+            if(OpenFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                using(var Stream = new System.IO.FileStream(OpenFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    var GPX = GPS.GPX.DOM10.GPX.ReadFromStream(Stream);
+
+                    foreach(var Track in GPX.Tracks)
+                    {
+                        foreach(var TrackSegment in Track.TrackSegments)
+                        {
+                            foreach(var TrackPoint in TrackSegment.TrackPoints)
+                            {
+                                _Map.Points.Add(_Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude));
+                            }
+                        }
+                    }
+                }
+                _Map.Refresh();
+            }
         }
     }
 }

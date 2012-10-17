@@ -39,11 +39,19 @@
             {
                 var Tile = new System.Windows.Forms.MapTile(Zoom, X, Y);
 
-                CacheForZoom.Add(TileIndex, Tile);
-                // here, a preliminary tile image could be calculated from other zoom levels
-                _FetchTile(Tile);
+                if(_SupportsTile(Tile) == true)
+                {
+                    CacheForZoom.Add(TileIndex, Tile);
+                    // here, a preliminary tile image could be calculated from other zoom levels
+                    _FetchTile(Tile);
 
-                return Tile;
+                    return Tile;
+                }
+                else
+                {
+                    return null;
+                }
+
             }
             else
             {
@@ -51,6 +59,7 @@
             }
         }
 
+        protected abstract System.Boolean _SupportsTile(System.Windows.Forms.MapTile Tile);
         protected abstract void _FetchTile(System.Windows.Forms.MapTile Tile);
         public abstract System.Int32 GetTileSize();
     }

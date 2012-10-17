@@ -1,4 +1,4 @@
-﻿public static partial class Extensions
+﻿public static partial class Common
 {
     public static System.Double GetFraction(this System.Double Double)
     {

@@ -2,6 +2,7 @@
 {
     public class MapnikDownloader : System.Windows.Forms.MapProvider
     {
+        private const System.Int32 _TileSize = 256;
         private const System.String _TileFormat = "http://tile.openstreetmap.org/{0}/{1}/{2}.png";
 
         protected override void _FetchTile(System.Windows.Forms.MapTile Tile)
@@ -9,9 +10,14 @@
             System.Threading.ThreadPool.QueueUserWorkItem(_DownloadTile, Tile);
         }
 
+        protected override bool _SupportsTile(System.Windows.Forms.MapTile Tile)
+        {
+            return (Tile.Zoom >= 0) && (Tile.Zoom <= 18) && (Tile.X >= 0) && (Tile.X < (1 << Tile.Zoom)) && (Tile.Y >= 0) && (Tile.Y < (1 << Tile.Zoom));
+        }
+
         public override System.Int32 GetTileSize()
         {
-            return 256;
+            return _TileSize;
         }
 
         private static void _DownloadTile(System.Object Parameter)
@@ -22,7 +28,7 @@
             {
                 var Request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(System.String.Format(_TileFormat, Tile.Zoom, Tile.X, Tile.Y));
 
-                Request.UserAgent = "MapControl";
+                Request.UserAgent = "GPX Track Viewer  (hagen.moebius@googlemail.com)";
 
                 using(var Response = Request.GetResponse())
                 {

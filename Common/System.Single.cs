@@ -1,4 +1,4 @@
-﻿public static partial class Extensions
+﻿public static partial class Common
 {
     /// <summary>
     /// Rounds the Single value towards 0 and converts it to an Int32 value.
