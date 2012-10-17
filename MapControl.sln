@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapControl", "MapControl\MapControl.csproj", "{975B3DEE-A3AF-4888-B509-CD7560D6CC59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{A57601BF-774E-4267-AF8A-E943E6EFAD94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapper", "Mapper\Mapper.csproj", "{A57601BF-774E-4267-AF8A-E943E6EFAD94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions", "Extensions\Extensions.csproj", "{C0D2BE83-7B4D-45AE-84F0-757495AC4F46}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{C0D2BE83-7B4D-45AE-84F0-757495AC4F46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPS", "GPS\GPS.csproj", "{EA20A8E9-A5DB-4898-A9CF-900006928515}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +27,10 @@ Global
 		{C0D2BE83-7B4D-45AE-84F0-757495AC4F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0D2BE83-7B4D-45AE-84F0-757495AC4F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0D2BE83-7B4D-45AE-84F0-757495AC4F46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA20A8E9-A5DB-4898-A9CF-900006928515}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA20A8E9-A5DB-4898-A9CF-900006928515}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA20A8E9-A5DB-4898-A9CF-900006928515}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA20A8E9-A5DB-4898-A9CF-900006928515}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,6 +2,7 @@
 {
     internal static class Application
     {
+        [System.STAThread]
         internal static void Main()
         {
             System.Windows.Forms.Application.EnableVisualStyles();
