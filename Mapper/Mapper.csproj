@@ -8,8 +8,8 @@
     <ProjectGuid>{A57601BF-774E-4267-AF8A-E943E6EFAD94}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Test</RootNamespace>
-    <AssemblyName>Map</AssemblyName>
+    <RootNamespace>Mapper</RootNamespace>
+    <AssemblyName>Mapper</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
@@ -77,7 +77,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Extensions\Common.csproj">
+    <ProjectReference Include="..\Common\Common.csproj">
       <Project>{C0D2BE83-7B4D-45AE-84F0-757495AC4F46}</Project>
       <Name>Common</Name>
     </ProjectReference>

@@ -307,6 +307,13 @@
             return Result;
         }
 
+        public System.Boolean IsScreenLocationInMap(System.Drawing.Point ScreenLocation)
+        {
+            var PixelLocation = GetPixelLocationFromScreenLocation(ScreenLocation);
+
+            return (PixelLocation.X >= 0) && (PixelLocation.Y >= 0) && (PixelLocation.X < (1 << _Zoom)) && (PixelLocation.Y < (1 << _Zoom));
+        }
+
         public void SetZoom(System.Int32 Zoom)
         {
             SetZoom(Zoom, Width / 2, Height / 2);
@@ -336,6 +343,9 @@
         protected override void OnPaint(System.Windows.Forms.PaintEventArgs EventArguments)
         {
             base.OnPaint(EventArguments);
+
+            var LoadingFont = new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 20, System.Drawing.FontStyle.Regular);
+
             if(_MapProvider != null)
             {
                 for(var X = System.Math.Max(0, -_TranslateX / _MapProvider.GetTileSize()); X * _MapProvider.GetTileSize() < Width - _TranslateX; ++X)
@@ -352,7 +362,8 @@
                             }
                             else
                             {
-                                EventArguments.Graphics.DrawRectangle(System.Drawing.Pens.DarkRed, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize() - 1, _MapProvider.GetTileSize() - 1);
+                                EventArguments.Graphics.FillRectangle(System.Drawing.Brushes.LightCoral, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize() - 1, _MapProvider.GetTileSize() - 1);
+                                EventArguments.Graphics.DrawString("Loading ...", LoadingFont, System.Drawing.Brushes.Black, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY);
                                 Tile.ImageChanged += () => Invoke(new MethodInvoker(Invalidate));
                             }
                         }

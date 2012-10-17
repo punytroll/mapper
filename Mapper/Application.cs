@@ -1,4 +1,4 @@
-﻿namespace Test
+﻿namespace Mapper
 {
     internal static class Application
     {
