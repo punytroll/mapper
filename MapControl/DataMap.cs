@@ -2,9 +2,39 @@
 {
     public class DataMap : System.Windows.Forms.Map
     {
-        private readonly System.Collections.Generic.List<System.Point> _Points;
+        public class Point
+        {
+            private System.Drawing.Color _Color;
+            private System.Point _GeoLocation;
 
-        public System.Collections.Generic.List<System.Point> Points
+            public System.Drawing.Color Color
+            {
+                get
+                {
+                    return _Color;
+                }
+                set
+                {
+                    _Color = value;
+                }
+            }
+
+            public System.Point GeoLocation
+            {
+                get
+                {
+                    return _GeoLocation;
+                }
+                set
+                {
+                    _GeoLocation = value;
+                }
+            }
+        }
+
+        private readonly System.Collections.Generic.List<Point> _Points;
+
+        public System.Collections.Generic.List<Point> Points
         {
             get
             {
@@ -14,20 +44,20 @@
 
         public DataMap()
         {
-            _Points = new System.Collections.Generic.List<System.Point>();
+            _Points = new System.Collections.Generic.List<Point>();
         }
 
         protected override void OnPaint(System.Windows.Forms.PaintEventArgs EventArguments)
         {
             base.OnPaint(EventArguments);
 
-            foreach(var GeoLocation in _Points)
+            foreach(var Point in _Points)
             {
-                var ScreenLocation = GetScreenLocationFromGeoLocation(GeoLocation);
+                var ScreenLocation = GetScreenLocationFromGeoLocation(Point.GeoLocation);
 
                 if((ScreenLocation.X >= 0) && (ScreenLocation.Y >= 0) && (ScreenLocation.X <= Width) && (ScreenLocation.Y <= Height))
                 {
-                    EventArguments.Graphics.FillRectangle(System.Drawing.Brushes.OrangeRed, ScreenLocation.X - 2, ScreenLocation.Y - 2, 5, 5);
+                    EventArguments.Graphics.FillRectangle(new System.Drawing.SolidBrush(Point.Color), ScreenLocation.X - 2, ScreenLocation.Y - 2, 5, 5);
                 }
             }
         }

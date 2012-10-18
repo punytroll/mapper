@@ -335,7 +335,7 @@
             }
         }
 
-        public System.Point GetGeoLocationFromGeoCoordinates(System.Double Latitude, System.Double Longitude)
+        public static System.Point GetGeoLocationFromGeoCoordinates(System.Double Latitude, System.Double Longitude)
         {
             return new System.Point(Longitude / 180.0 * System.Math.PI, Latitude / 180.0 * System.Math.PI);
         }
