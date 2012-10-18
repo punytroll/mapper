@@ -362,7 +362,7 @@
                             }
                             else
                             {
-                                EventArguments.Graphics.FillRectangle(System.Drawing.Brushes.LightCoral, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize() - 1, _MapProvider.GetTileSize() - 1);
+                                EventArguments.Graphics.FillRectangle(System.Drawing.Brushes.DimGray, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize() - 1, _MapProvider.GetTileSize() - 1);
                                 EventArguments.Graphics.DrawString("Loading ...", LoadingFont, System.Drawing.Brushes.Black, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY);
                                 Tile.ImageChanged += () => Invoke(new MethodInvoker(Invalidate));
                             }
