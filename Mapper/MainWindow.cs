@@ -169,6 +169,7 @@
                 using(var Stream = new System.IO.FileStream(OpenFileDialog.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
                 {
                     var GPX = GPS.GPX.DOM10.GPX.ReadFromStream(Stream);
+                    var MaximalSpeed = 0.0;
 
                     foreach(var Track in GPX.Tracks)
                     {
@@ -176,7 +177,31 @@
                         {
                             foreach(var TrackPoint in TrackSegment.TrackPoints)
                             {
-                                _Map.Points.Add(_Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude));
+                                if(TrackPoint.Speed > MaximalSpeed)
+                                {
+                                    MaximalSpeed = TrackPoint.Speed;
+                                }
+                            }
+                        }
+                    }
+                    foreach(var Track in GPX.Tracks)
+                    {
+                        foreach(var TrackSegment in Track.TrackSegments)
+                        {
+                            foreach(var TrackPoint in TrackSegment.TrackPoints)
+                            {
+                                var Point = new System.Windows.Forms.DataMap.Point();
+
+                                if(MaximalSpeed == 0.0)
+                                {
+                                    Point.Color = System.Drawing.Color.Black;
+                                }
+                                else
+                                {
+                                    Point.Color = _Mix(System.Drawing.Color.Red, System.Drawing.Color.Lime, TrackPoint.Speed / MaximalSpeed);
+                                }
+                                Point.GeoLocation = System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude);
+                                _Map.Points.Add(Point);
                             }
                         }
                     }
@@ -206,6 +231,11 @@
             var Latitude = GeoLocation.Y * 180.0 / System.Math.PI;
 
             return Latitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Latitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Latitude > 0) ? ("N") : ("S")) + ", " + Longitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Longitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Longitude > 0) ? ("O") : ("W"));
+        }
+
+        private static System.Drawing.Color _Mix(System.Drawing.Color Low, System.Drawing.Color High, System.Double Fraction)
+        {
+            return System.Drawing.Color.FromArgb((Low.R + ((High.R - Low.R) * Fraction)).GetTruncatedAsInt32(), (Low.G + ((High.G - Low.G) * Fraction)).GetTruncatedAsInt32(), (Low.B + ((High.B - Low.B) * Fraction)).GetTruncatedAsInt32());
         }
     }
 }
