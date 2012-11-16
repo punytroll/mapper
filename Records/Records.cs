@@ -20,6 +20,14 @@ namespace Records
             }
         }
 
+        public Record Last
+        {
+            get
+            {
+                return _Records.LastOrDefault();
+            }
+        }
+
         private readonly System.Collections.Generic.List<Record> _Records;
 
         public Records()

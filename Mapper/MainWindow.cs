@@ -1,4 +1,6 @@
-﻿namespace Mapper
+﻿using Records;
+
+namespace Mapper
 {
     internal class MainWindow : System.Windows.Forms.Form
     {
@@ -8,6 +10,7 @@
         private System.Windows.Forms.ToolStripMenuItem blackToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bySpeedToolStripMenuItem;
         private System.Drawing.Point? _MapControlDragPoint;
+        private System.Windows.Forms.ToolStripMenuItem _ColourByElevationDifferenceMenuItem;
         private readonly System.Collections.Generic.List<Records.Records> _Records;
 
         public MainWindow()
@@ -31,6 +34,7 @@
             this.blackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bySpeedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._Map = new System.Windows.Forms.DataMap();
+            this._ColourByElevationDifferenceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             _StatusBar = new System.Windows.Forms.StatusStrip();
             _OpenButton = new System.Windows.Forms.ToolStripButton();
             _MenuBar = new System.Windows.Forms.ToolStrip();
@@ -89,7 +93,8 @@
             _ColouringMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.blackToolStripMenuItem,
             this.bySpeedToolStripMenuItem,
-            _ColourByHeightMenuItem});
+            _ColourByHeightMenuItem,
+            this._ColourByElevationDifferenceMenuItem});
             _ColouringMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             _ColouringMenuItem.Name = "_ColouringMenuItem";
             _ColouringMenuItem.Size = new System.Drawing.Size(73, 22);
@@ -98,16 +103,23 @@
             // blackToolStripMenuItem
             // 
             this.blackToolStripMenuItem.Name = "blackToolStripMenuItem";
-            this.blackToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.blackToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.blackToolStripMenuItem.Text = "Black";
             this.blackToolStripMenuItem.Click += new System.EventHandler(this._ColourBlackMenuItemClicked);
             // 
             // bySpeedToolStripMenuItem
             // 
             this.bySpeedToolStripMenuItem.Name = "bySpeedToolStripMenuItem";
-            this.bySpeedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.bySpeedToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.bySpeedToolStripMenuItem.Text = "by Speed";
             this.bySpeedToolStripMenuItem.Click += new System.EventHandler(this._ColourBySpeedMenuItemClicked);
+            // 
+            // _ColourByHeightMenuItem
+            // 
+            _ColourByHeightMenuItem.Name = "_ColourByHeightMenuItem";
+            _ColourByHeightMenuItem.Size = new System.Drawing.Size(194, 22);
+            _ColourByHeightMenuItem.Text = "by Elevation";
+            _ColourByHeightMenuItem.Click += new System.EventHandler(this._ColourByHeightMenuItem_Click);
             // 
             // _Map
             // 
@@ -127,12 +139,12 @@
             this._Map.MouseDown += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseDown);
             this._Map.MouseUp += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseUp);
             // 
-            // _ColourByHeightMenuItem
+            // _ColourByElevationDifferenceMenuItem
             // 
-            _ColourByHeightMenuItem.Name = "_ColourByHeightMenuItem";
-            _ColourByHeightMenuItem.Size = new System.Drawing.Size(152, 22);
-            _ColourByHeightMenuItem.Text = "by Height";
-            _ColourByHeightMenuItem.Click += new System.EventHandler(this._ColourByHeightMenuItem_Click);
+            this._ColourByElevationDifferenceMenuItem.Name = "_ColourByElevationDifferenceMenuItem";
+            this._ColourByElevationDifferenceMenuItem.Size = new System.Drawing.Size(194, 22);
+            this._ColourByElevationDifferenceMenuItem.Text = "by Elevation difference";
+            this._ColourByElevationDifferenceMenuItem.Click += new System.EventHandler(this._ColourByElevationDifferenceMenuItem_Click);
             // 
             // MainWindow
             // 
@@ -231,6 +243,11 @@
                         }
                     }
                     _Records.Add(Records);
+                    Records.Map((One, Two) => Two.Add("elevation-difference-before", Two.Get<System.Double>("elevation") - One.Get<System.Double>("elevation")));
+                    Records.First.Add("elevation-difference-before", 0.0);
+                    Records.Map((One, Two) => One.Add("elevation-difference-after", Two.Get<System.Double>("elevation") - One.Get<System.Double>("elevation")));
+                    Records.Last.Add("elevation-difference-after", 0.0);
+                    Records.AddField("elevation-difference", "elevation-difference-before", "elevation-difference-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
                     foreach(var Record in Records)
                     {
                         var Point = new System.Windows.Forms.DataMap.Point();
@@ -273,9 +290,8 @@
             return System.Drawing.Color.FromArgb((Low.R + ((High.R - Low.R) * Fraction)).GetTruncatedAsInt32(), (Low.G + ((High.G - Low.G) * Fraction)).GetTruncatedAsInt32(), (Low.B + ((High.B - Low.B) * Fraction)).GetTruncatedAsInt32());
         }
 
-        private void _ColourBlackMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
+        private void _ColourByColourFunction(System.Func<Records.Record, System.Drawing.Color> ColourFunction)
         {
-            _Map.Points.Clear();
             foreach(var Records in _Records)
             {
                 foreach(var Record in Records)
@@ -283,96 +299,69 @@
                     var Point = new System.Windows.Forms.DataMap.Point();
 
                     Point.Object = Record;
-                    Point.Color = System.Drawing.Color.Black;
+                    Point.Color = ColourFunction(Record);
                     Point.GeoLocation = Record.Get<System.Point>("geo-location");
                     _Map.Points.Add(Point);
                 }
             }
+        }
+
+        private void _ColourByPropertyAndMinimumMaximum(System.String PropertyName, System.Double Minimum, System.Double Maximum)
+        {
+            _ColourByColourFunction(Record => _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (Record.Get<System.Double>(PropertyName) - Minimum) / (Maximum - Minimum)));
+        }
+
+        private void _ColourBlackMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
+        {
+            _Map.Points.Clear();
+            _ColourByColourFunction(Record => System.Drawing.Color.Black);
+            _Map.Refresh();
+        }
+
+        private void _GetMinimumAndMaximum(System.String PropertyName, ref System.Double Minimum, ref System.Double Maximum)
+        {
+            Minimum = System.Double.MaxValue;
+            Maximum = System.Double.MinValue;
+            foreach(var Records in _Records)
+            {
+                foreach(var Record in Records)
+                {
+                    if(Record.Get<System.Double>(PropertyName) > Maximum)
+                    {
+                        Maximum = Record.Get<System.Double>(PropertyName);
+                    }
+                    if(Record.Get<System.Double>(PropertyName) < Minimum)
+                    {
+                        Minimum = Record.Get<System.Double>(PropertyName);
+                    }
+                }
+            }
+        }
+
+        private void _ColourByProperty(System.String PropertyName)
+        {
+            var Minimum = System.Double.MaxValue;
+            var Maximum = System.Double.MinValue;
+
+            _GetMinimumAndMaximum(PropertyName, ref Minimum, ref Maximum);
+            _Map.Points.Clear();
+            _ColourByPropertyAndMinimumMaximum(PropertyName, Minimum, Maximum);
             _Map.Refresh();
         }
 
         private void _ColourBySpeedMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
         {
-            var MinimalSpeed = System.Double.MaxValue;
-            var MaximalSpeed = System.Double.MinValue;
-
-            foreach(var Records in _Records)
-            {
-                foreach(var Record in Records)
-                {
-                    if(Record.Get<System.Double>("speed") > MaximalSpeed)
-                    {
-                        MaximalSpeed = Record.Get<System.Double>("speed");
-                    }
-                    if(Record.Get<System.Double>("speed") < MinimalSpeed)
-                    {
-                        MinimalSpeed = Record.Get<System.Double>("speed");
-                    }
-                }
-            }
-            _Map.Points.Clear();
-            foreach(var Records in _Records)
-            {
-                foreach(var Record in Records)
-                {
-                    var Point = new System.Windows.Forms.DataMap.Point();
-
-                    Point.Object = Record;
-                    if(MaximalSpeed == MinimalSpeed)
-                    {
-                        Point.Color = System.Drawing.Color.Black;
-                    }
-                    else
-                    {
-                        Point.Color = _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (Record.Get<System.Double>("speed") - MinimalSpeed) / (MaximalSpeed - MinimalSpeed));
-                    }
-                    Point.GeoLocation = Record.Get<System.Point>("geo-location");
-                    _Map.Points.Add(Point);
-                }
-            }
-            _Map.Refresh();
+            _ColourByProperty("speed");
         }
 
-        private void _ColourByHeightMenuItem_Click(object sender, System.EventArgs e)
+        private void _ColourByHeightMenuItem_Click(System.Object Sender, System.EventArgs EventArguments)
         {
-            var MinimalHeight = System.Double.MaxValue;
-            var MaximalHeight = System.Double.MinValue;
+            _ColourByProperty("elevation");
+        }
 
-            foreach(var Records in _Records)
-            {
-                foreach(var Record in Records)
-                {
-                    if(Record.Get<System.Double>("elevation") > MaximalHeight)
-                    {
-                        MaximalHeight = Record.Get<System.Double>("elevation");
-                    }
-                    if(Record.Get<System.Double>("elevation") < MinimalHeight)
-                    {
-                        MinimalHeight = Record.Get<System.Double>("elevation");
-                    }
-                }
-            }
-            _Map.Points.Clear();
-            foreach(var Records in _Records)
-            {
-                foreach(var Record in Records)
-                {
-                    var Point = new System.Windows.Forms.DataMap.Point();
-
-                    Point.Object = Record;
-                    if(MaximalHeight == MinimalHeight)
-                    {
-                        Point.Color = System.Drawing.Color.Black;
-                    }
-                    else
-                    {
-                        Point.Color = _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (Record.Get<System.Double>("elevation") - MinimalHeight) / (MaximalHeight - MinimalHeight));
-                    }
-                    Point.GeoLocation = Record.Get<System.Point>("geo-location");
-                    _Map.Points.Add(Point);
-                }
-            }
-            _Map.Refresh();
+        private void _ColourByElevationDifferenceMenuItem_Click(System.Object Sender, System.EventArgs EventArguments)
+        {
+            _ColourByProperty("elevation-difference");
         }
     }
 }
