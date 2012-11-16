@@ -8,12 +8,12 @@
         private System.Windows.Forms.ToolStripMenuItem blackToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bySpeedToolStripMenuItem;
         private System.Drawing.Point? _MapControlDragPoint;
-        private System.Collections.Generic.List<GPS.GPX.DOM10.GPX> _GPXs;
+        private readonly System.Collections.Generic.List<Records.Records> _Records;
 
         public MainWindow()
         {
             InitializeComponent();
-            _GPXs = new System.Collections.Generic.List<GPS.GPX.DOM10.GPX>();
+            _Records = new System.Collections.Generic.List<Records.Records>();
             _Map.MapProvider = new System.Windows.Forms.MapnikDownloader();
             _MapControlDragPoint = null;
             MouseWheel += _OnMouseWheel;
@@ -213,22 +213,32 @@
                 using(var Stream = new System.IO.FileStream(OpenFileDialog.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
                 {
                     var GPX = GPS.GPX.DOM10.GPX.ReadFromStream(Stream);
+                    var Records = new Records.Records();
 
-                    _GPXs.Add(GPX);
                     foreach(var Track in GPX.Tracks)
                     {
                         foreach(var TrackSegment in Track.TrackSegments)
                         {
                             foreach(var TrackPoint in TrackSegment.TrackPoints)
                             {
-                                var Point = new System.Windows.Forms.DataMap.Point();
+                                var Record = new Records.Record();
 
-                                Point.Object = TrackPoint;
-                                Point.Color = System.Drawing.Color.Black;
-                                Point.GeoLocation = System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude);
-                                _Map.Points.Add(Point);
+                                Record.Add("geo-location", System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude));
+                                Record.Add("elevation", TrackPoint.Elevation);
+                                Record.Add("speed", TrackPoint.Speed);
+                                Records.Append(Record);
                             }
                         }
+                    }
+                    _Records.Add(Records);
+                    foreach(var Record in Records)
+                    {
+                        var Point = new System.Windows.Forms.DataMap.Point();
+
+                        Point.Object = Record;
+                        Point.Color = System.Drawing.Color.Black;
+                        Point.GeoLocation = Record.Get<System.Point>("geo-location");
+                        _Map.Points.Add(Point);
                     }
                 }
                 _Map.Refresh();
@@ -266,22 +276,16 @@
         private void _ColourBlackMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
         {
             _Map.Points.Clear();
-            foreach(var GPX in _GPXs)
+            foreach(var Records in _Records)
             {
-                foreach(var Track in GPX.Tracks)
+                foreach(var Record in Records)
                 {
-                    foreach(var TrackSegment in Track.TrackSegments)
-                    {
-                        foreach(var TrackPoint in TrackSegment.TrackPoints)
-                        {
-                            var Point = new System.Windows.Forms.DataMap.Point();
+                    var Point = new System.Windows.Forms.DataMap.Point();
 
-                            Point.Object = TrackPoint;
-                            Point.Color = System.Drawing.Color.Black;
-                            Point.GeoLocation = System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude);
-                            _Map.Points.Add(Point);
-                        }
-                    }
+                    Point.Object = Record;
+                    Point.Color = System.Drawing.Color.Black;
+                    Point.GeoLocation = Record.Get<System.Point>("geo-location");
+                    _Map.Points.Add(Point);
                 }
             }
             _Map.Refresh();
@@ -292,50 +296,38 @@
             var MinimalSpeed = System.Double.MaxValue;
             var MaximalSpeed = System.Double.MinValue;
 
-            foreach(var GPX in _GPXs)
+            foreach(var Records in _Records)
             {
-                foreach(var Track in GPX.Tracks)
+                foreach(var Record in Records)
                 {
-                    foreach(var TrackSegment in Track.TrackSegments)
+                    if(Record.Get<System.Double>("speed") > MaximalSpeed)
                     {
-                        foreach(var TrackPoint in TrackSegment.TrackPoints)
-                        {
-                            if(TrackPoint.Speed > MaximalSpeed)
-                            {
-                                MaximalSpeed = TrackPoint.Speed;
-                            }
-                            if(TrackPoint.Speed < MinimalSpeed)
-                            {
-                                MinimalSpeed = TrackPoint.Speed;
-                            }
-                        }
+                        MaximalSpeed = Record.Get<System.Double>("speed");
+                    }
+                    if(Record.Get<System.Double>("speed") < MinimalSpeed)
+                    {
+                        MinimalSpeed = Record.Get<System.Double>("speed");
                     }
                 }
             }
             _Map.Points.Clear();
-            foreach(var GPX in _GPXs)
+            foreach(var Records in _Records)
             {
-                foreach(var Track in GPX.Tracks)
+                foreach(var Record in Records)
                 {
-                    foreach(var TrackSegment in Track.TrackSegments)
-                    {
-                        foreach(var TrackPoint in TrackSegment.TrackPoints)
-                        {
-                            var Point = new System.Windows.Forms.DataMap.Point();
+                    var Point = new System.Windows.Forms.DataMap.Point();
 
-                            Point.Object = TrackPoint;
-                            if(MaximalSpeed == MinimalSpeed)
-                            {
-                                Point.Color = System.Drawing.Color.Black;
-                            }
-                            else
-                            {
-                                Point.Color = _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (TrackPoint.Speed - MinimalSpeed) / (MaximalSpeed - MinimalSpeed));
-                            }
-                            Point.GeoLocation = System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude);
-                            _Map.Points.Add(Point);
-                        }
+                    Point.Object = Record;
+                    if(MaximalSpeed == MinimalSpeed)
+                    {
+                        Point.Color = System.Drawing.Color.Black;
                     }
+                    else
+                    {
+                        Point.Color = _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (Record.Get<System.Double>("speed") - MinimalSpeed) / (MaximalSpeed - MinimalSpeed));
+                    }
+                    Point.GeoLocation = Record.Get<System.Point>("geo-location");
+                    _Map.Points.Add(Point);
                 }
             }
             _Map.Refresh();
@@ -346,50 +338,38 @@
             var MinimalHeight = System.Double.MaxValue;
             var MaximalHeight = System.Double.MinValue;
 
-            foreach(var GPX in _GPXs)
+            foreach(var Records in _Records)
             {
-                foreach(var Track in GPX.Tracks)
+                foreach(var Record in Records)
                 {
-                    foreach(var TrackSegment in Track.TrackSegments)
+                    if(Record.Get<System.Double>("elevation") > MaximalHeight)
                     {
-                        foreach(var TrackPoint in TrackSegment.TrackPoints)
-                        {
-                            if(TrackPoint.Elevation > MaximalHeight)
-                            {
-                                MaximalHeight = TrackPoint.Elevation;
-                            }
-                            if(TrackPoint.Elevation < MinimalHeight)
-                            {
-                                MinimalHeight = TrackPoint.Elevation;
-                            }
-                        }
+                        MaximalHeight = Record.Get<System.Double>("elevation");
+                    }
+                    if(Record.Get<System.Double>("elevation") < MinimalHeight)
+                    {
+                        MinimalHeight = Record.Get<System.Double>("elevation");
                     }
                 }
             }
             _Map.Points.Clear();
-            foreach(var GPX in _GPXs)
+            foreach(var Records in _Records)
             {
-                foreach(var Track in GPX.Tracks)
+                foreach(var Record in Records)
                 {
-                    foreach(var TrackSegment in Track.TrackSegments)
-                    {
-                        foreach(var TrackPoint in TrackSegment.TrackPoints)
-                        {
-                            var Point = new System.Windows.Forms.DataMap.Point();
+                    var Point = new System.Windows.Forms.DataMap.Point();
 
-                            Point.Object = TrackPoint;
-                            if(MaximalHeight == MinimalHeight)
-                            {
-                                Point.Color = System.Drawing.Color.Black;
-                            }
-                            else
-                            {
-                                Point.Color = _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (TrackPoint.Elevation - MinimalHeight) / (MaximalHeight - MinimalHeight));
-                            }
-                            Point.GeoLocation = System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude);
-                            _Map.Points.Add(Point);
-                        }
+                    Point.Object = Record;
+                    if(MaximalHeight == MinimalHeight)
+                    {
+                        Point.Color = System.Drawing.Color.Black;
                     }
+                    else
+                    {
+                        Point.Color = _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (Record.Get<System.Double>("elevation") - MinimalHeight) / (MaximalHeight - MinimalHeight));
+                    }
+                    Point.GeoLocation = Record.Get<System.Point>("geo-location");
+                    _Map.Points.Add(Point);
                 }
             }
             _Map.Refresh();
