@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPS", "GPS\GPS.csproj", "{EA20A8E9-A5DB-4898-A9CF-900006928515}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Records", "Records\Records.csproj", "{AFF870CE-738D-4B7E-9EFC-0C6BD2A2CF38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{EA20A8E9-A5DB-4898-A9CF-900006928515}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA20A8E9-A5DB-4898-A9CF-900006928515}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA20A8E9-A5DB-4898-A9CF-900006928515}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFF870CE-738D-4B7E-9EFC-0C6BD2A2CF38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFF870CE-738D-4B7E-9EFC-0C6BD2A2CF38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFF870CE-738D-4B7E-9EFC-0C6BD2A2CF38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFF870CE-738D-4B7E-9EFC-0C6BD2A2CF38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

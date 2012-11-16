@@ -89,6 +89,10 @@
       <Project>{975B3DEE-A3AF-4888-B509-CD7560D6CC59}</Project>
       <Name>MapControl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Records\Records.csproj">
+      <Project>{AFF870CE-738D-4B7E-9EFC-0C6BD2A2CF38}</Project>
+      <Name>Records</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainWindow.resx">
