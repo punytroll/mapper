@@ -6,6 +6,7 @@
         {
             private System.Drawing.Color _Color;
             private System.Point _GeoLocation;
+            private System.Object _Object;
 
             public System.Drawing.Color Color
             {
@@ -28,6 +29,18 @@
                 set
                 {
                     _GeoLocation = value;
+                }
+            }
+
+            public System.Object Object
+            {
+                get
+                {
+                    return _Object;
+                }
+                set
+                {
+                    _Object = value;
                 }
             }
         }
