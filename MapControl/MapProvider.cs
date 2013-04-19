@@ -3,10 +3,13 @@
     public abstract class MapProvider
     {
         private readonly System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>> _Cache;
+        private readonly System.ImageHarddriveCache _HarddriveCache;
 
         protected MapProvider()
         {
             _Cache = new System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>>();
+            _HarddriveCache = new ImageHarddriveCache();
+            _HarddriveCache.RootDirectory = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "Cache");
         }
 
         public System.Boolean HasTile(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
@@ -42,8 +45,19 @@
                 if(_SupportsTile(Tile) == true)
                 {
                     CacheForZoom.Add(TileIndex, Tile);
-                    // here, a preliminary tile image could be calculated from other zoom levels
-                    _FetchTile(Tile);
+
+                    var Image = _HarddriveCache.LoadTile(Zoom, X, Y);
+
+                    if(Image == null)
+                    {
+                        Tile.ImageChanged += () => _StoreImageOnHarddrive(Tile);
+                        // here, a preliminary tile image could be calculated from other zoom levels
+                        _FetchTile(Tile);
+                    }
+                    else
+                    {
+                        Tile.SetImage(Image);
+                    }
 
                     return Tile;
                 }
@@ -56,6 +70,14 @@
             else
             {
                 return CacheForZoom[TileIndex];
+            }
+        }
+
+        private void _StoreImageOnHarddrive(System.Windows.Forms.MapTile Tile)
+        {
+            lock(Tile.Image)
+            {
+                _HarddriveCache.StoreTile(Tile.Zoom, Tile.X, Tile.Y, Tile.Image);
             }
         }
 

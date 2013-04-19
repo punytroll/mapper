@@ -358,7 +358,10 @@
                         {
                             if(Tile.Image != null)
                             {
-                                EventArguments.Graphics.DrawImageUnscaled(Tile.Image, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY);
+                                lock(Tile.Image)
+                                {
+                                    EventArguments.Graphics.DrawImageUnscaled(Tile.Image, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY);
+                                }
                             }
                             else
                             {

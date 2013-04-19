@@ -50,6 +50,7 @@
     <Compile Include="DebugCacheMap.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ImageHarddriveCache.cs" />
     <Compile Include="Map.cs">
       <SubType>Component</SubType>
     </Compile>
