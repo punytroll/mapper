@@ -35,7 +35,7 @@
                         }
                         else
                         {
-                            EventArguments.Graphics.DrawRectangle(System.Drawing.Pens.Blue, X * TileSize + TranslateX, Y * TileSize + TranslateY, TileSize - 1, TileSize - 1);
+                            EventArguments.Graphics.DrawRectangle(System.Drawing.Pens.Yellow, X * TileSize + TranslateX, Y * TileSize + TranslateY, TileSize - 1, TileSize - 1);
                             MapProvider.GetTile(Zoom + DeltaZoom, X, Y).ImageChanged += () => Invoke(new MethodInvoker(Invalidate));
                         }
                     }
