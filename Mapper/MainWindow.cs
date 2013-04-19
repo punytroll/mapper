@@ -1,6 +1,4 @@
-﻿using Records;
-
-namespace Mapper
+﻿namespace Mapper
 {
     internal class MainWindow : System.Windows.Forms.Form
     {
