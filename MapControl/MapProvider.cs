@@ -46,7 +46,7 @@
                 {
                     CacheForZoom.Add(TileIndex, Tile);
 
-                    var Image = _HarddriveCache.LoadTile(Zoom, X, Y);
+                    var Image = _HarddriveCache.LoadTileImage(Zoom, X, Y);
 
                     if(Image == null)
                     {
@@ -77,7 +77,14 @@
         {
             lock(Tile.Image)
             {
-                _HarddriveCache.StoreTile(Tile.Zoom, Tile.X, Tile.Y, Tile.Image);
+                if(Tile.ExpireDateTime.HasValue == true)
+                {
+                    _HarddriveCache.StoreTileImage(Tile.Zoom, Tile.X, Tile.Y, Tile.Image, Tile.ExpireDateTime.Value);
+                }
+                else
+                {
+                    _HarddriveCache.StoreTileImage(Tile.Zoom, Tile.X, Tile.Y, Tile.Image, System.DateTime.Now.AddDays(7));
+                }
             }
         }
 
