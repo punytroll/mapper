@@ -36,6 +36,7 @@
 
                     if(Stream != null)
                     {
+                        Tile.SetExpireDateTime(System.DateTime.Parse(Response.Headers["Expires"]));
                         Tile.SetImage(new System.Drawing.Bitmap(Stream));
                         Stream.Close();
                     }
