@@ -15,6 +15,11 @@
             return (Tile.Zoom >= 0) && (Tile.Zoom <= 18) && (Tile.X >= 0) && (Tile.X < (1 << Tile.Zoom)) && (Tile.Y >= 0) && (Tile.Y < (1 << Tile.Zoom));
         }
 
+        public override string GetSetIdentifier()
+        {
+            return "mapnik";
+        }
+
         public override System.Int32 GetTileSize()
         {
             return _TileSize;

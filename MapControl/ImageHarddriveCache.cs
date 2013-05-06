@@ -25,7 +25,7 @@
             _RootDirectory = null;
         }
 
-        public System.Drawing.Image LoadTileImage(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
+        public System.Drawing.Image LoadTileImage(System.String SetIdentifier, System.Int32 Zoom, System.Int32 X, System.Int32 Y)
         {
             System.Drawing.Image Result = null;
 
@@ -35,20 +35,24 @@
 
                 if(System.IO.Directory.Exists(Path) == true)
                 {
-                    Path = System.IO.Path.Combine(Path, Zoom.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    Path = System.IO.Path.Combine(Path, SetIdentifier);
                     if(System.IO.Directory.Exists(Path) == true)
                     {
-                        Path = System.IO.Path.Combine(Path, X.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                        Path = System.IO.Path.Combine(Path, Zoom.ToString(System.Globalization.CultureInfo.InvariantCulture));
                         if(System.IO.Directory.Exists(Path) == true)
                         {
-                            var Entry = Y.ToString(System.Globalization.CultureInfo.InvariantCulture) + ".png";
-
-                            if(IsExpired(Path, Entry) == false)
+                            Path = System.IO.Path.Combine(Path, X.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                            if(System.IO.Directory.Exists(Path) == true)
                             {
-                                Path = System.IO.Path.Combine(Path, Entry);
-                                if(System.IO.File.Exists(Path) == true)
+                                var Entry = Y.ToString(System.Globalization.CultureInfo.InvariantCulture) + ".png";
+
+                                if(IsExpired(Path, Entry) == false)
                                 {
-                                    Result = new System.Drawing.Bitmap(Path);
+                                    Path = System.IO.Path.Combine(Path, Entry);
+                                    if(System.IO.File.Exists(Path) == true)
+                                    {
+                                        Result = new System.Drawing.Bitmap(Path);
+                                    }
                                 }
                             }
                         }
@@ -130,12 +134,17 @@
             return Result;
         }
 
-        public void StoreTileImage(System.Int32 Zoom, System.Int32 X, System.Int32 Y, System.Drawing.Image Image, System.DateTime ExpireDateTime)
+        public void StoreTileImage(System.String SetIdentifier, System.Int32 Zoom, System.Int32 X, System.Int32 Y, System.Drawing.Image Image, System.DateTime ExpireDateTime)
         {
             if(_RootDirectory != null)
             {
                 var Path = _RootDirectory;
 
+                if(System.IO.Directory.Exists(Path) == false)
+                {
+                    System.IO.Directory.CreateDirectory(Path);
+                }
+                Path = System.IO.Path.Combine(Path, SetIdentifier);
                 if(System.IO.Directory.Exists(Path) == false)
                 {
                     System.IO.Directory.CreateDirectory(Path);
