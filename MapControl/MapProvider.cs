@@ -40,13 +40,13 @@
 
             if(CacheForZoom.ContainsKey(TileIndex) == false)
             {
-                var Tile = new System.Windows.Forms.MapTile(Zoom, X, Y);
+                var Tile = new System.Windows.Forms.MapTile(GetSetIdentifier(), Zoom, X, Y);
 
                 if(_SupportsTile(Tile) == true)
                 {
                     CacheForZoom.Add(TileIndex, Tile);
 
-                    var Image = _HarddriveCache.LoadTileImage(Zoom, X, Y);
+                    var Image = _HarddriveCache.LoadTileImage(GetSetIdentifier(), Zoom, X, Y);
 
                     if(Image == null)
                     {
@@ -79,17 +79,18 @@
             {
                 if(Tile.ExpireDateTime.HasValue == true)
                 {
-                    _HarddriveCache.StoreTileImage(Tile.Zoom, Tile.X, Tile.Y, Tile.Image, Tile.ExpireDateTime.Value);
+                    _HarddriveCache.StoreTileImage(Tile.SetIdentifier, Tile.Zoom, Tile.X, Tile.Y, Tile.Image, Tile.ExpireDateTime.Value);
                 }
                 else
                 {
-                    _HarddriveCache.StoreTileImage(Tile.Zoom, Tile.X, Tile.Y, Tile.Image, System.DateTime.Now.AddDays(7));
+                    _HarddriveCache.StoreTileImage(Tile.SetIdentifier, Tile.Zoom, Tile.X, Tile.Y, Tile.Image, System.DateTime.Now.AddDays(7));
                 }
             }
         }
 
         protected abstract System.Boolean _SupportsTile(System.Windows.Forms.MapTile Tile);
         protected abstract void _FetchTile(System.Windows.Forms.MapTile Tile);
+        public abstract System.String GetSetIdentifier();
         public abstract System.Int32 GetTileSize();
     }
 }

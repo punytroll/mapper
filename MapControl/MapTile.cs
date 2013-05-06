@@ -6,6 +6,7 @@
 
         private System.DateTime? _ExpireDateTime;
         private System.Drawing.Image _Image;
+        private readonly System.String _SetIdentifier;
         private readonly System.Int32 _X;
         private readonly System.Int32 _Y;
         private readonly System.Int32 _Zoom;
@@ -23,6 +24,14 @@
             get
             {
                 return _Image;
+            }
+        }
+
+        public System.String SetIdentifier
+        {
+            get
+            {
+                return _SetIdentifier;
             }
         }
 
@@ -50,10 +59,11 @@
             }
         }
 
-        public MapTile(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
+        public MapTile(System.String SetIdentifier, System.Int32 Zoom, System.Int32 X, System.Int32 Y)
         {
             _ExpireDateTime = null;
             _Image = null;
+            _SetIdentifier = SetIdentifier;
             _X = X;
             _Y = Y;
             _Zoom = Zoom;
