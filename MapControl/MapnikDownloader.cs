@@ -1,31 +1,31 @@
 ﻿namespace System.Windows.Forms
 {
-    public class MapnikDownloader : System.Windows.Forms.MapProvider
+    public class MapnikDownloader : System.ITileDownloader
     {
         private const System.Int32 _TileSize = 256;
         private const System.String _TileFormat = "http://tile.openstreetmap.org/{0}/{1}/{2}.png";
 
-        protected override void _FetchTile(System.Windows.Forms.MapTile Tile)
-        {
-            System.Threading.ThreadPool.QueueUserWorkItem(_DownloadTile, Tile);
-        }
-
-        protected override bool _SupportsTile(System.Windows.Forms.MapTile Tile)
+        public bool SupportsTile(System.Windows.Forms.MapTile Tile)
         {
             return (Tile.Zoom >= 0) && (Tile.Zoom <= 18) && (Tile.X >= 0) && (Tile.X < (1 << Tile.Zoom)) && (Tile.Y >= 0) && (Tile.Y < (1 << Tile.Zoom));
         }
 
-        public override string GetSetIdentifier()
+        public void FetchTile(System.Windows.Forms.MapTile Tile)
+        {
+            System.Threading.ThreadPool.QueueUserWorkItem(_DownloadTile, Tile);
+        }
+
+        public System.String GetSetIdentifier()
         {
             return "mapnik";
         }
 
-        public override System.Int32 GetTileSize()
+        public System.Int32 GetTileSize()
         {
             return _TileSize;
         }
 
-        private static void _DownloadTile(System.Object Parameter)
+        private void _DownloadTile(System.Object Parameter)
         {
             var Tile = (System.Windows.Forms.MapTile)Parameter;
 
@@ -41,6 +41,7 @@
 
                     if(Stream != null)
                     {
+                        Tile.SetSetIdentifier(GetSetIdentifier());
                         Tile.SetExpireDateTime(System.DateTime.Parse(Response.Headers["Expires"]));
                         Tile.SetImage(new System.Drawing.Bitmap(Stream));
                         Stream.Close();

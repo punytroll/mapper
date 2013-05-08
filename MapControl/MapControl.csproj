@@ -51,6 +51,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ImageHarddriveCache.cs" />
+    <Compile Include="ImageMemoryCache.cs" />
     <Compile Include="Map.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -58,6 +59,7 @@
     <Compile Include="MapProvider.cs" />
     <Compile Include="MapTile.cs" />
     <Compile Include="Point.cs" />
+    <Compile Include="ITileDownloader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

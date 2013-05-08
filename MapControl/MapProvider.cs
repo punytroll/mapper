@@ -1,9 +1,10 @@
 ﻿namespace System.Windows.Forms
 {
-    public abstract class MapProvider
+    public class MapProvider
     {
         private readonly System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>> _Cache;
         private System.ImageHarddriveCache _HarddriveCache;
+        private System.ITileDownloader _TileDownloader;
 
         public System.ImageHarddriveCache HarddriveCache
         {
@@ -17,10 +18,28 @@
             }
         }
 
-        protected MapProvider()
+        public System.ITileDownloader TileDownloader
+        {
+            get
+            {
+                return _TileDownloader;
+            }
+            set
+            {
+                _TileDownloader = value;
+            }
+        }
+
+        public MapProvider()
         {
             _Cache = new System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>>();
             _HarddriveCache = null;
+            _TileDownloader = null;
+        }
+
+        public System.Int32 GetTileSize()
+        {
+            return _TileDownloader.GetTileSize();
         }
 
         public System.Boolean HasTile(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
@@ -51,9 +70,9 @@
 
             if(CacheForZoom.ContainsKey(TileIndex) == false)
             {
-                var Tile = new System.Windows.Forms.MapTile(GetSetIdentifier(), Zoom, X, Y);
+                var Tile = new System.Windows.Forms.MapTile(Zoom, X, Y);
 
-                if(_SupportsTile(Tile) == true)
+                if(_TileDownloader.SupportsTile(Tile) == true)
                 {
                     CacheForZoom.Add(TileIndex, Tile);
 
@@ -61,13 +80,13 @@
 
                     if(_HarddriveCache != null)
                     {
-                        Image = _HarddriveCache.LoadTileImage(GetSetIdentifier(), Zoom, X, Y);
+                        Image = _HarddriveCache.LoadTileImage(Zoom, X, Y);
                     }
                     if(Image == null)
                     {
                         Tile.ImageChanged += () => _StoreImageOnHarddrive(Tile);
                         // here, a preliminary tile image could be calculated from other zoom levels
-                        _FetchTile(Tile);
+                        _TileDownloader.FetchTile(Tile);
                     }
                     else
                     {
@@ -96,19 +115,14 @@
                 {
                     if(Tile.ExpireDateTime.HasValue == true)
                     {
-                        _HarddriveCache.StoreTileImage(Tile.SetIdentifier, Tile.Zoom, Tile.X, Tile.Y, Tile.Image, Tile.ExpireDateTime.Value);
+                        _HarddriveCache.StoreTileImage(Tile.Zoom, Tile.X, Tile.Y, Tile.Image, Tile.ExpireDateTime.Value);
                     }
                     else
                     {
-                        _HarddriveCache.StoreTileImage(Tile.SetIdentifier, Tile.Zoom, Tile.X, Tile.Y, Tile.Image, System.DateTime.Now.AddDays(7));
+                        _HarddriveCache.StoreTileImage(Tile.Zoom, Tile.X, Tile.Y, Tile.Image, System.DateTime.Now.AddDays(7));
                     }
                 }
             }
         }
-
-        protected abstract System.Boolean _SupportsTile(System.Windows.Forms.MapTile Tile);
-        protected abstract void _FetchTile(System.Windows.Forms.MapTile Tile);
-        public abstract System.String GetSetIdentifier();
-        public abstract System.Int32 GetTileSize();
     }
 }
