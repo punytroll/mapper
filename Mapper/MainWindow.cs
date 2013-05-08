@@ -16,6 +16,8 @@
             InitializeComponent();
             _Records = new System.Collections.Generic.List<Records.Records>();
             _Map.MapProvider = new System.Windows.Forms.MapnikDownloader();
+            _Map.MapProvider.HarddriveCache = new System.ImageHarddriveCache();
+            _Map.MapProvider.HarddriveCache.RootDirectory = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "Cache");
             _MapControlDragPoint = null;
             MouseWheel += _OnMouseWheel;
         }
