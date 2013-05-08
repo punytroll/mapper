@@ -3,13 +3,24 @@
     public abstract class MapProvider
     {
         private readonly System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>> _Cache;
-        private readonly System.ImageHarddriveCache _HarddriveCache;
+        private System.ImageHarddriveCache _HarddriveCache;
+
+        public System.ImageHarddriveCache HarddriveCache
+        {
+            get
+            {
+                return _HarddriveCache;
+            }
+            set
+            {
+                _HarddriveCache = value;
+            }
+        }
 
         protected MapProvider()
         {
             _Cache = new System.Collections.Generic.Dictionary<System.Int32, System.Collections.Generic.Dictionary<System.Drawing.Point, System.Windows.Forms.MapTile>>();
-            _HarddriveCache = new ImageHarddriveCache();
-            _HarddriveCache.RootDirectory = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "Cache");
+            _HarddriveCache = null;
         }
 
         public System.Boolean HasTile(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
@@ -46,8 +57,12 @@
                 {
                     CacheForZoom.Add(TileIndex, Tile);
 
-                    var Image = _HarddriveCache.LoadTileImage(GetSetIdentifier(), Zoom, X, Y);
+                    System.Drawing.Image Image = null;
 
+                    if(_HarddriveCache != null)
+                    {
+                        Image = _HarddriveCache.LoadTileImage(GetSetIdentifier(), Zoom, X, Y);
+                    }
                     if(Image == null)
                     {
                         Tile.ImageChanged += () => _StoreImageOnHarddrive(Tile);
@@ -75,15 +90,18 @@
 
         private void _StoreImageOnHarddrive(System.Windows.Forms.MapTile Tile)
         {
-            lock(Tile.Image)
+            if(_HarddriveCache != null)
             {
-                if(Tile.ExpireDateTime.HasValue == true)
+                lock(Tile.Image)
                 {
-                    _HarddriveCache.StoreTileImage(Tile.SetIdentifier, Tile.Zoom, Tile.X, Tile.Y, Tile.Image, Tile.ExpireDateTime.Value);
-                }
-                else
-                {
-                    _HarddriveCache.StoreTileImage(Tile.SetIdentifier, Tile.Zoom, Tile.X, Tile.Y, Tile.Image, System.DateTime.Now.AddDays(7));
+                    if(Tile.ExpireDateTime.HasValue == true)
+                    {
+                        _HarddriveCache.StoreTileImage(Tile.SetIdentifier, Tile.Zoom, Tile.X, Tile.Y, Tile.Image, Tile.ExpireDateTime.Value);
+                    }
+                    else
+                    {
+                        _HarddriveCache.StoreTileImage(Tile.SetIdentifier, Tile.Zoom, Tile.X, Tile.Y, Tile.Image, System.DateTime.Now.AddDays(7));
+                    }
                 }
             }
         }
