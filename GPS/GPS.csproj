@@ -50,6 +50,7 @@
   -->
   <ItemGroup>
     <Compile Include="GPX.cs" />
+    <Compile Include="KML.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.XML" />

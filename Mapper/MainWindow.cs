@@ -8,7 +8,7 @@
         private System.Windows.Forms.ToolStripMenuItem blackToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bySpeedToolStripMenuItem;
         private System.Drawing.Point? _MapControlDragPoint;
-        private System.Windows.Forms.ToolStripMenuItem _ColourByElevationDifferenceMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem _ColourByAltitudeDifferenceMenuItem;
         private readonly System.Collections.Generic.List<Records.Records> _Records;
 
         public MainWindow()
@@ -29,18 +29,18 @@
             System.Windows.Forms.ToolStripButton _OpenButton;
             System.Windows.Forms.ToolStrip _MenuBar;
             System.Windows.Forms.ToolStripDropDownButton _ColouringMenuItem;
-            System.Windows.Forms.ToolStripMenuItem _ColourByHeightMenuItem;
+            System.Windows.Forms.ToolStripMenuItem _ColourByAltitudeMenuItem;
             this._ZoomLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._CoordinatesLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.blackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bySpeedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._ColourByAltitudeDifferenceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._Map = new System.Windows.Forms.DataMap();
-            this._ColourByElevationDifferenceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             _StatusBar = new System.Windows.Forms.StatusStrip();
             _OpenButton = new System.Windows.Forms.ToolStripButton();
             _MenuBar = new System.Windows.Forms.ToolStrip();
             _ColouringMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
-            _ColourByHeightMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            _ColourByAltitudeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             _StatusBar.SuspendLayout();
             _MenuBar.SuspendLayout();
             this.SuspendLayout();
@@ -94,8 +94,8 @@
             _ColouringMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.blackToolStripMenuItem,
             this.bySpeedToolStripMenuItem,
-            _ColourByHeightMenuItem,
-            this._ColourByElevationDifferenceMenuItem});
+            _ColourByAltitudeMenuItem,
+            this._ColourByAltitudeDifferenceMenuItem});
             _ColouringMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             _ColouringMenuItem.Name = "_ColouringMenuItem";
             _ColouringMenuItem.Size = new System.Drawing.Size(73, 22);
@@ -115,18 +115,25 @@
             this.bySpeedToolStripMenuItem.Text = "by Speed";
             this.bySpeedToolStripMenuItem.Click += new System.EventHandler(this._ColourBySpeedMenuItemClicked);
             // 
-            // _ColourByHeightMenuItem
+            // _ColourByAltitudeMenuItem
             // 
-            _ColourByHeightMenuItem.Name = "_ColourByHeightMenuItem";
-            _ColourByHeightMenuItem.Size = new System.Drawing.Size(194, 22);
-            _ColourByHeightMenuItem.Text = "by Elevation";
-            _ColourByHeightMenuItem.Click += new System.EventHandler(this._ColourByHeightMenuItem_Click);
+            _ColourByAltitudeMenuItem.Name = "_ColourByAltitudeMenuItem";
+            _ColourByAltitudeMenuItem.Size = new System.Drawing.Size(194, 22);
+            _ColourByAltitudeMenuItem.Text = "by Altitude";
+            _ColourByAltitudeMenuItem.Click += new System.EventHandler(this._ColourByAltitudeMenuItemClicked);
+            // 
+            // _ColourByAltitudeDifferenceMenuItem
+            // 
+            this._ColourByAltitudeDifferenceMenuItem.Name = "_ColourByAltitudeDifferenceMenuItem";
+            this._ColourByAltitudeDifferenceMenuItem.Size = new System.Drawing.Size(188, 22);
+            this._ColourByAltitudeDifferenceMenuItem.Text = "by Altitude difference";
+            this._ColourByAltitudeDifferenceMenuItem.Click += new System.EventHandler(this._ColourByAltitudeDifferenceMenuItemClicked);
             // 
             // _Map
             // 
-            this._Map.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this._Map.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this._Map.BackColor = System.Drawing.SystemColors.ControlDark;
             this._Map.Location = new System.Drawing.Point(0, 25);
             this._Map.MapProvider = null;
@@ -136,16 +143,9 @@
             this._Map.TabIndex = 4;
             this._Map.TranslateX = 0;
             this._Map.TranslateY = 0;
-            this._Map.MouseMove += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseMoved);
             this._Map.MouseDown += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseDown);
+            this._Map.MouseMove += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseMoved);
             this._Map.MouseUp += new System.Windows.Forms.MouseEventHandler(this._OnMapControlMouseUp);
-            // 
-            // _ColourByElevationDifferenceMenuItem
-            // 
-            this._ColourByElevationDifferenceMenuItem.Name = "_ColourByElevationDifferenceMenuItem";
-            this._ColourByElevationDifferenceMenuItem.Size = new System.Drawing.Size(194, 22);
-            this._ColourByElevationDifferenceMenuItem.Text = "by Elevation difference";
-            this._ColourByElevationDifferenceMenuItem.Click += new System.EventHandler(this._ColourByElevationDifferenceMenuItem_Click);
             // 
             // MainWindow
             // 
@@ -225,38 +225,75 @@
             {
                 using(var Stream = new System.IO.FileStream(OpenFileDialog.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
                 {
-                    var GPX = GPS.GPX.DOM10.GPX.ReadFromStream(Stream);
-                    var Records = new Records.Records();
-
-                    foreach(var Track in GPX.Tracks)
+                    if(OpenFileDialog.FileName.EndsWith(".gpx") == true)
                     {
-                        foreach(var TrackSegment in Track.TrackSegments)
-                        {
-                            foreach(var TrackPoint in TrackSegment.TrackPoints)
-                            {
-                                var Record = new Records.Record();
+                        var GPX = GPS.GPX.DOM10.GPX.ReadFromStream(Stream);
+                        var Records = new Records.Records();
 
-                                Record.Add("geo-location", System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude));
-                                Record.Add("elevation", TrackPoint.Elevation);
-                                Record.Add("speed", TrackPoint.Speed);
-                                Records.Append(Record);
+                        foreach(var Track in GPX.Tracks)
+                        {
+                            foreach(var TrackSegment in Track.TrackSegments)
+                            {
+                                foreach(var TrackPoint in TrackSegment.TrackPoints)
+                                {
+                                    var Record = new Records.Record();
+
+                                    Record.Add("geo-location", System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude));
+                                    Record.Add("altitude", TrackPoint.Elevation);
+                                    Record.Add("speed", TrackPoint.Speed);
+                                    Records.Append(Record);
+                                }
                             }
                         }
-                    }
-                    _Records.Add(Records);
-                    Records.Map((One, Two) => Two.Add("elevation-difference-before", Two.Get<System.Double>("elevation") - One.Get<System.Double>("elevation")));
-                    Records.First.Add("elevation-difference-before", 0.0);
-                    Records.Map((One, Two) => One.Add("elevation-difference-after", Two.Get<System.Double>("elevation") - One.Get<System.Double>("elevation")));
-                    Records.Last.Add("elevation-difference-after", 0.0);
-                    Records.AddField("elevation-difference", "elevation-difference-before", "elevation-difference-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
-                    foreach(var Record in Records)
-                    {
-                        var Point = new System.Windows.Forms.DataMap.Point();
+                        _Records.Add(Records);
+                        Records.Map((One, Two) => Two.Add("altitude-difference-before", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
+                        Records.First.Add("altitude-difference-before", 0.0);
+                        Records.Map((One, Two) => One.Add("altitude-difference-after", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
+                        Records.Last.Add("altitude-difference-after", 0.0);
+                        Records.AddField("altitude-difference", "altitude-difference-before", "altitude-difference-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
+                        foreach(var Record in Records)
+                        {
+                            var Point = new System.Windows.Forms.DataMap.Point();
 
-                        Point.Object = Record;
-                        Point.Color = System.Drawing.Color.Black;
-                        Point.GeoLocation = Record.Get<System.Point>("geo-location");
-                        _Map.Points.Add(Point);
+                            Point.Object = Record;
+                            Point.Color = System.Drawing.Color.Black;
+                            Point.GeoLocation = Record.Get<System.Point>("geo-location");
+                            _Map.Points.Add(Point);
+                        }
+                    }
+                    else if(OpenFileDialog.FileName.EndsWith(".kml") == true)
+                    {
+                        var KML = GPS.KML.Version_2_2.KML.ReadFromStream(Stream);
+                        var Records = new Records.Records();
+
+                        foreach(var Placemark in KML.Placemarks)
+                        {
+                            if(Placemark.LineString != null)
+                            {
+                                Records.Record LastRecord = null;
+
+                                foreach(var Coordinates in Placemark.LineString.Coordinates)
+                                {
+                                    var Record = new Records.Record();
+
+                                    Record.Add("geo-location", System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(Coordinates.Latitude, Coordinates.Longitude));
+                                    Record.Add("altitude", Coordinates.Altitude);
+                                    Records.Append(Record);
+                                    if(LastRecord != null)
+                                    {
+                                        var Line = new System.Windows.Forms.DataMap.Line();
+
+                                        Line.Object = new System.Pair<Records.Record, Records.Record>(LastRecord, Record);
+                                        Line.Color = System.Drawing.Color.Black;
+                                        Line.BeginGeoLocation = LastRecord.Get<System.Point>("geo-location");
+                                        Line.EndGeoLocation = Record.Get<System.Point>("geo-location");
+                                        _Map.Lines.Add(Line);
+                                    }
+                                    LastRecord = Record;
+                                }
+                            }
+                        }
+                        _Records.Add(Records);
                     }
                 }
                 _Map.Refresh();
@@ -309,6 +346,10 @@
 
         private void _ColourByPropertyAndMinimumMaximum(System.String PropertyName, System.Double Minimum, System.Double Maximum)
         {
+            if(Minimum == Maximum)
+            {
+                Maximum = Maximum + 1;
+            }
             _ColourByColourFunction(Record => _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (Record.Get<System.Double>(PropertyName) - Minimum) / (Maximum - Minimum)));
         }
 
@@ -355,14 +396,14 @@
             _ColourByProperty("speed");
         }
 
-        private void _ColourByHeightMenuItem_Click(System.Object Sender, System.EventArgs EventArguments)
+        private void _ColourByAltitudeMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
         {
-            _ColourByProperty("elevation");
+            _ColourByProperty("altitude");
         }
 
-        private void _ColourByElevationDifferenceMenuItem_Click(System.Object Sender, System.EventArgs EventArguments)
+        private void _ColourByAltitudeDifferenceMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
         {
-            _ColourByProperty("elevation-difference");
+            _ColourByProperty("altitude-difference");
         }
     }
 }

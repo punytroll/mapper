@@ -48,6 +48,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="Pair.cs" />
     <Compile Include="System.Double.cs" />
     <Compile Include="System.Single.cs" />
   </ItemGroup>
