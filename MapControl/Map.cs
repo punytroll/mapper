@@ -3,6 +3,7 @@
     public class Map : System.Windows.Forms.Control
     {
         private System.Windows.Forms.MapProvider _MapProvider;
+        private System.Single _Opacity;
         private System.Int32 _TranslateX;
         private System.Int32 _TranslateY;
         private System.Int32 _Zoom;
@@ -17,6 +18,19 @@
             {
                 _MapProvider = value;
                 Refresh();
+            }
+        }
+
+        public System.Single Opacity
+        {
+            get
+            {
+                return _Opacity;
+            }
+            set
+            {
+                _Opacity = value;
+                Invalidate();
             }
         }
 
@@ -57,6 +71,7 @@
         public Map()
         {
             _MapProvider = null;
+            _Opacity = 1.0f;
             _Zoom = 0;
             SetStyle(System.Windows.Forms.ControlStyles.UserPaint | System.Windows.Forms.ControlStyles.AllPaintingInWmPaint | System.Windows.Forms.ControlStyles.OptimizedDoubleBuffer, true);
         }
@@ -368,6 +383,17 @@
 
             if(_MapProvider != null)
             {
+                var ColorMatrixValues = new System.Single[][] {
+                    new System.Single[] { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f },
+                    new System.Single[] { 0.0f, 1.0f, 0.0f, 0.0f, 0.0f },
+                    new System.Single[] { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f },
+                    new System.Single[] { 0.0f, 0.0f, 0.0f, _Opacity, 0.0f },
+                    new System.Single[] { 0.0f, 0.0f, 0.0f, 0.0f, 1.0f }
+                };
+                var ColorMatrix = new System.Drawing.Imaging.ColorMatrix(ColorMatrixValues);
+                var ImageAttributes = new System.Drawing.Imaging.ImageAttributes();
+
+                ImageAttributes.SetColorMatrix(ColorMatrix);
                 for(var X = System.Math.Max(0, -_TranslateX / _MapProvider.GetTileSize()); X * _MapProvider.GetTileSize() < Width - _TranslateX; ++X)
                 {
                     for(var Y = -_TranslateY / _MapProvider.GetTileSize(); Y * _MapProvider.GetTileSize() < Width - _TranslateY; ++Y)
@@ -380,7 +406,9 @@
                             {
                                 lock(Tile.Image)
                                 {
-                                    EventArguments.Graphics.DrawImageUnscaled(Tile.Image, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY);
+                                    var DestinationRectangle = new System.Drawing.Rectangle(X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize(), _MapProvider.GetTileSize());
+
+                                    EventArguments.Graphics.DrawImage(Tile.Image, DestinationRectangle, 0, 0, _MapProvider.GetTileSize(), _MapProvider.GetTileSize(), System.Drawing.GraphicsUnit.Pixel, ImageAttributes);
                                 }
                             }
                             else

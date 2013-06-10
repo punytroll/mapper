@@ -11,6 +11,7 @@ namespace System.Windows.Forms
             private Color _Color;
             private System.Point _EndGeoLocation;
             private Object _Object;
+            private System.Single _Width;
 
             public System.Point BeginGeoLocation
             {
@@ -59,6 +60,18 @@ namespace System.Windows.Forms
                     _Object = value;
                 }
             }
+
+            public System.Single Width
+            {
+                get
+                {
+                    return _Width;
+                }
+                set
+                {
+                    _Width = value;
+                }
+            }
         }
 
         public class Point
@@ -66,6 +79,7 @@ namespace System.Windows.Forms
             private Color _Color;
             private System.Point _GeoLocation;
             private Object _Object;
+            private Single _Size;
 
             public Color Color
             {
@@ -100,6 +114,18 @@ namespace System.Windows.Forms
                 set
                 {
                     _Object = value;
+                }
+            }
+
+            public System.Single Size
+            {
+                get
+                {
+                    return _Size;
+                }
+                set
+                {
+                    _Size = value;
                 }
             }
         }
@@ -139,7 +165,7 @@ namespace System.Windows.Forms
 
                 if(((BeginScreenLocation.X >= 0) && (BeginScreenLocation.Y >= 0) && (BeginScreenLocation.X <= Width) && (BeginScreenLocation.Y <= Height)) || ((EndScreenLocation.X >= 0) && (EndScreenLocation.Y >= 0) && (EndScreenLocation.X <= Width) && (EndScreenLocation.Y <= Height)))
                 {
-                    EventArguments.Graphics.DrawLine(new Pen(Line.Color, 5), BeginScreenLocation.X, BeginScreenLocation.Y, EndScreenLocation.X, EndScreenLocation.Y);
+                    EventArguments.Graphics.DrawLine(new Pen(Line.Color, Line.Width), BeginScreenLocation.X, BeginScreenLocation.Y, EndScreenLocation.X, EndScreenLocation.Y);
                 }
             }
             foreach(var Point in _Points)
@@ -148,7 +174,7 @@ namespace System.Windows.Forms
 
                 if((ScreenLocation.X >= 0) && (ScreenLocation.Y >= 0) && (ScreenLocation.X <= Width) && (ScreenLocation.Y <= Height))
                 {
-                    EventArguments.Graphics.FillRectangle(new SolidBrush(Point.Color), ScreenLocation.X - 2, ScreenLocation.Y - 2, 5, 5);
+                    EventArguments.Graphics.FillRectangle(new SolidBrush(Point.Color), ScreenLocation.X - Point.Size / 2.0f, ScreenLocation.Y - Point.Size / 2.0f, Point.Size, Point.Size);
                 }
             }
         }
