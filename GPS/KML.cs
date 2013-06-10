@@ -8,9 +8,16 @@ namespace GPS.KML.Version_2_2
 {
     public class Coordinates
     {
+        public Double? Altitude;
         public Double Latitude;
         public Double Longitude;
-        public Double Altitude;
+
+        public Coordinates()
+        {
+            Altitude = null;
+            Latitude = 0.0;
+            Longitude = 0.0;
+        }
     }
 
     public class LineString

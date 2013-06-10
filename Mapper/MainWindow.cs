@@ -238,10 +238,18 @@
                                 {
                                     var Record = new Records.Record();
 
-                                    Record.Add("geo-location", System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(TrackPoint.Latitude, TrackPoint.Longitude));
+                                    Record.Add("latitude", System.Windows.Forms.Map.GetLatitudeLocationFromLatitudeCoordinates(TrackPoint.Latitude));
+                                    Record.Add("longitude", System.Windows.Forms.Map.GetongitudeLocationFromLongitudeCoordinates(TrackPoint.Longitude));
                                     Record.Add("altitude", TrackPoint.Elevation);
                                     Record.Add("speed", TrackPoint.Speed);
                                     Records.Append(Record);
+
+                                    var Point = new System.Windows.Forms.DataMap.Point();
+
+                                    Point.Object = Record;
+                                    Point.Color = System.Drawing.Color.Black;
+                                    Point.GeoLocation = new System.Point(Record.Get<System.Double>("longitude"), Record.Get<System.Double>("latitude"));
+                                    _Map.Points.Add(Point);
                                 }
                             }
                         }
@@ -251,15 +259,6 @@
                         Records.Map((One, Two) => One.Add("altitude-difference-after", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
                         Records.Last.Add("altitude-difference-after", 0.0);
                         Records.AddField("altitude-difference", "altitude-difference-before", "altitude-difference-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
-                        foreach(var Record in Records)
-                        {
-                            var Point = new System.Windows.Forms.DataMap.Point();
-
-                            Point.Object = Record;
-                            Point.Color = System.Drawing.Color.Black;
-                            Point.GeoLocation = Record.Get<System.Point>("geo-location");
-                            _Map.Points.Add(Point);
-                        }
                     }
                     else if(OpenFileDialog.FileName.EndsWith(".kml") == true)
                     {
@@ -276,17 +275,21 @@
                                 {
                                     var Record = new Records.Record();
 
-                                    Record.Add("geo-location", System.Windows.Forms.Map.GetGeoLocationFromGeoCoordinates(Coordinates.Latitude, Coordinates.Longitude));
-                                    Record.Add("altitude", Coordinates.Altitude);
+                                    Record.Add("latitude", System.Windows.Forms.Map.GetLatitudeLocationFromLatitudeCoordinates(Coordinates.Latitude));
+                                    Record.Add("longitude", System.Windows.Forms.Map.GetongitudeLocationFromLongitudeCoordinates(Coordinates.Longitude));
+                                    if(Coordinates.Altitude != null)
+                                    {
+                                        Record.Add("altitude", Coordinates.Altitude);
+                                    }
                                     Records.Append(Record);
                                     if(LastRecord != null)
                                     {
                                         var Line = new System.Windows.Forms.DataMap.Line();
 
                                         Line.Object = new System.Pair<Records.Record, Records.Record>(LastRecord, Record);
-                                        Line.Color = System.Drawing.Color.Black;
-                                        Line.BeginGeoLocation = LastRecord.Get<System.Point>("geo-location");
-                                        Line.EndGeoLocation = Record.Get<System.Point>("geo-location");
+                                        Line.Color = System.Drawing.Color.FromArgb(180, 0, 0, 0);
+                                        Line.BeginGeoLocation = new System.Point(LastRecord.Get<System.Double>("longitude"), LastRecord.Get<System.Double>("latitude"));
+                                        Line.EndGeoLocation = new System.Point(Record.Get<System.Double>("longitude"), Record.Get<System.Double>("latitude"));
                                         _Map.Lines.Add(Line);
                                     }
                                     LastRecord = Record;
@@ -338,7 +341,7 @@
 
                     Point.Object = Record;
                     Point.Color = ColourFunction(Record);
-                    Point.GeoLocation = Record.Get<System.Point>("geo-location");
+                    Point.GeoLocation = new System.Point(Record.Get<System.Double>("longitude"), Record.Get<System.Double>("latitude"));
                     _Map.Points.Add(Point);
                 }
             }
