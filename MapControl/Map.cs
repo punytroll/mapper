@@ -335,6 +335,16 @@
             }
         }
 
+        public static System.Double GetLatitudeLocationFromLatitudeCoordinates(System.Double Latitude)
+        {
+            return Latitude / 180.0 * System.Math.PI;
+        }
+
+        public static System.Double GetongitudeLocationFromLongitudeCoordinates(System.Double Longitude)
+        {
+            return Longitude / 180.0 * System.Math.PI;
+        }
+
         public static System.Point GetGeoLocationFromGeoCoordinates(System.Double Latitude, System.Double Longitude)
         {
             return new System.Point(Longitude / 180.0 * System.Math.PI, Latitude / 180.0 * System.Math.PI);
