@@ -5,16 +5,16 @@
         private System.Windows.Forms.ToolStripStatusLabel _CoordinatesLabel;
         private System.Windows.Forms.DataMap _Map;
         private System.Windows.Forms.ToolStripStatusLabel _ZoomLabel;
-        private System.Windows.Forms.ToolStripMenuItem blackToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem bySpeedToolStripMenuItem;
         private System.Drawing.Point? _MapControlDragPoint;
-        private System.Windows.Forms.ToolStripMenuItem _ColourByAltitudeDifferenceMenuItem;
+        private System.Windows.Forms.TrackBar _OpacityTrackbar;
+        private System.Windows.Forms.ToolStripDropDownButton _ColoringMenuItem;
         private readonly System.Collections.Generic.List<Mapper.Track> _Tracks;
 
         public MainWindow()
         {
             InitializeComponent();
             _Tracks = new System.Collections.Generic.List<Mapper.Track>();
+            _Map.Opacity = _OpacityTrackbar.Value / 100.0f;
             _Map.MapProvider = new System.Windows.Forms.MapProvider();
             _Map.MapProvider.TileDownloader = new System.Windows.Forms.MapnikDownloader();
             _Map.MapProvider.HarddriveCache = new System.ImageHarddriveCache();
@@ -28,21 +28,25 @@
             System.Windows.Forms.StatusStrip _StatusBar;
             System.Windows.Forms.ToolStripButton _OpenButton;
             System.Windows.Forms.ToolStrip _MenuBar;
-            System.Windows.Forms.ToolStripDropDownButton _ColouringMenuItem;
-            System.Windows.Forms.ToolStripMenuItem _ColourByAltitudeMenuItem;
+            System.Windows.Forms.ToolStripMenuItem _ColorBlackMenuItem;
+            System.Windows.Forms.ToolStripMenuItem _ColorBySpeedMenuItem;
+            System.Windows.Forms.ToolStripMenuItem _ColorByAltitudeMenuItem;
+            System.Windows.Forms.ToolStripMenuItem _ColorBySlopeMenuItem;
             this._ZoomLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._CoordinatesLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.blackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bySpeedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this._ColourByAltitudeDifferenceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._ColoringMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
+            this._OpacityTrackbar = new System.Windows.Forms.TrackBar();
             this._Map = new System.Windows.Forms.DataMap();
             _StatusBar = new System.Windows.Forms.StatusStrip();
             _OpenButton = new System.Windows.Forms.ToolStripButton();
             _MenuBar = new System.Windows.Forms.ToolStrip();
-            _ColouringMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
-            _ColourByAltitudeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            _ColorBlackMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            _ColorBySpeedMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            _ColorByAltitudeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            _ColorBySlopeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             _StatusBar.SuspendLayout();
             _MenuBar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._OpacityTrackbar)).BeginInit();
             this.SuspendLayout();
             // 
             // _StatusBar
@@ -81,64 +85,80 @@
             // 
             _MenuBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             _OpenButton,
-            _ColouringMenuItem});
+            this._ColoringMenuItem});
             _MenuBar.Location = new System.Drawing.Point(0, 0);
             _MenuBar.Name = "_MenuBar";
             _MenuBar.Size = new System.Drawing.Size(844, 25);
             _MenuBar.TabIndex = 5;
             _MenuBar.Text = "toolStrip1";
             // 
-            // _ColouringMenuItem
+            // _ColoringMenuItem
             // 
-            _ColouringMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            _ColouringMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.blackToolStripMenuItem,
-            this.bySpeedToolStripMenuItem,
-            _ColourByAltitudeMenuItem,
-            this._ColourByAltitudeDifferenceMenuItem});
-            _ColouringMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
-            _ColouringMenuItem.Name = "_ColouringMenuItem";
-            _ColouringMenuItem.Size = new System.Drawing.Size(73, 22);
-            _ColouringMenuItem.Text = "Colouring";
+            this._ColoringMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this._ColoringMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            _ColorBlackMenuItem,
+            _ColorBySpeedMenuItem,
+            _ColorByAltitudeMenuItem,
+            _ColorBySlopeMenuItem});
+            this._ColoringMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this._ColoringMenuItem.Name = "_ColoringMenuItem";
+            this._ColoringMenuItem.Size = new System.Drawing.Size(66, 22);
+            this._ColoringMenuItem.Text = "Coloring";
             // 
-            // blackToolStripMenuItem
+            // _ColorBlackMenuItem
             // 
-            this.blackToolStripMenuItem.Name = "blackToolStripMenuItem";
-            this.blackToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            this.blackToolStripMenuItem.Text = "Black";
-            this.blackToolStripMenuItem.Click += new System.EventHandler(this._ColourBlackMenuItemClicked);
+            _ColorBlackMenuItem.Name = "_ColorBlackMenuItem";
+            _ColorBlackMenuItem.Size = new System.Drawing.Size(152, 22);
+            _ColorBlackMenuItem.Text = "Black";
+            _ColorBlackMenuItem.Click += new System.EventHandler(this._OnColorBlackMenuItemClicked);
             // 
-            // bySpeedToolStripMenuItem
+            // _ColorBySpeedMenuItem
             // 
-            this.bySpeedToolStripMenuItem.Name = "bySpeedToolStripMenuItem";
-            this.bySpeedToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            this.bySpeedToolStripMenuItem.Text = "by Speed";
-            this.bySpeedToolStripMenuItem.Click += new System.EventHandler(this._ColourBySpeedMenuItemClicked);
+            _ColorBySpeedMenuItem.Name = "_ColorBySpeedMenuItem";
+            _ColorBySpeedMenuItem.Size = new System.Drawing.Size(152, 22);
+            _ColorBySpeedMenuItem.Text = "by Speed";
+            _ColorBySpeedMenuItem.Click += new System.EventHandler(this._OnColorBySpeedMenuItemClicked);
             // 
-            // _ColourByAltitudeMenuItem
+            // _ColorByAltitudeMenuItem
             // 
-            _ColourByAltitudeMenuItem.Name = "_ColourByAltitudeMenuItem";
-            _ColourByAltitudeMenuItem.Size = new System.Drawing.Size(194, 22);
-            _ColourByAltitudeMenuItem.Text = "by Altitude";
-            _ColourByAltitudeMenuItem.Click += new System.EventHandler(this._ColourByAltitudeMenuItemClicked);
+            _ColorByAltitudeMenuItem.Name = "_ColorByAltitudeMenuItem";
+            _ColorByAltitudeMenuItem.Size = new System.Drawing.Size(152, 22);
+            _ColorByAltitudeMenuItem.Text = "by Altitude";
+            _ColorByAltitudeMenuItem.Click += new System.EventHandler(this._OnColorByAltitudeMenuItemClicked);
             // 
-            // _ColourByAltitudeDifferenceMenuItem
+            // _ColorBySlopeMenuItem
             // 
-            this._ColourByAltitudeDifferenceMenuItem.Name = "_ColourByAltitudeDifferenceMenuItem";
-            this._ColourByAltitudeDifferenceMenuItem.Size = new System.Drawing.Size(188, 22);
-            this._ColourByAltitudeDifferenceMenuItem.Text = "by Altitude difference";
-            this._ColourByAltitudeDifferenceMenuItem.Click += new System.EventHandler(this._ColourByAltitudeDifferenceMenuItemClicked);
+            _ColorBySlopeMenuItem.Name = "_ColorBySlopeMenuItem";
+            _ColorBySlopeMenuItem.Size = new System.Drawing.Size(152, 22);
+            _ColorBySlopeMenuItem.Text = "by Slope";
+            _ColorBySlopeMenuItem.Click += new System.EventHandler(this._OnColorBySlopeMenuItemClicked);
+            // 
+            // _OpacityTrackbar
+            // 
+            this._OpacityTrackbar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._OpacityTrackbar.BackColor = System.Drawing.SystemColors.Control;
+            this._OpacityTrackbar.Location = new System.Drawing.Point(728, 41);
+            this._OpacityTrackbar.Maximum = 100;
+            this._OpacityTrackbar.Name = "_OpacityTrackbar";
+            this._OpacityTrackbar.Size = new System.Drawing.Size(104, 45);
+            this._OpacityTrackbar.TabIndex = 6;
+            this._OpacityTrackbar.TabStop = false;
+            this._OpacityTrackbar.TickStyle = System.Windows.Forms.TickStyle.None;
+            this._OpacityTrackbar.Value = 50;
+            this._OpacityTrackbar.Scroll += new System.EventHandler(this._OnOpacityTrackbarScrolled);
+            this._OpacityTrackbar.Enter += new System.EventHandler(this._OnOpacityTrackbarFocusEntered);
             // 
             // _Map
             // 
             this._Map.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this._Map.BackColor = System.Drawing.SystemColors.ControlDark;
+            this._Map.BackColor = System.Drawing.Color.Black;
             this._Map.Location = new System.Drawing.Point(0, 25);
             this._Map.MapProvider = null;
             this._Map.Margin = new System.Windows.Forms.Padding(0);
             this._Map.Name = "_Map";
+            this._Map.Opacity = 1F;
             this._Map.Size = new System.Drawing.Size(844, 483);
             this._Map.TabIndex = 4;
             this._Map.TranslateX = 0;
@@ -150,6 +170,7 @@
             // MainWindow
             // 
             this.ClientSize = new System.Drawing.Size(844, 530);
+            this.Controls.Add(this._OpacityTrackbar);
             this.Controls.Add(_MenuBar);
             this.Controls.Add(this._Map);
             this.Controls.Add(_StatusBar);
@@ -160,6 +181,7 @@
             _StatusBar.PerformLayout();
             _MenuBar.ResumeLayout(false);
             _MenuBar.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._OpacityTrackbar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -230,6 +252,7 @@
                         var GPX = GPS.GPX.DOM10.GPX.ReadFromStream(Stream);
                         var Track = new Mapper.Track();
 
+                        Track.DrawLines = false;
                         foreach(var GPXTrack in GPX.Tracks)
                         {
                             foreach(var GPXTrackSegment in GPXTrack.TrackSegments)
@@ -242,38 +265,34 @@
                                     TrackPoint.Add("longitude", System.Windows.Forms.Map.GetLongitudeLocationFromLongitudeCoordinates(GPXTrackPoint.Longitude));
                                     TrackPoint.Add("altitude", GPXTrackPoint.Elevation);
                                     TrackPoint.Add("speed", GPXTrackPoint.Speed);
+                                    TrackPoint.Add("size", 5.0f);
+                                    TrackPoint.Add("color", System.Drawing.Color.Black);
                                     Track.Append(TrackPoint);
-
-                                    var Point = new System.Windows.Forms.DataMap.Point();
-
-                                    Point.Object = TrackPoint;
-                                    Point.Color = System.Drawing.Color.Black;
-                                    Point.GeoLocation = new System.Point(TrackPoint.Get<System.Double>("longitude"), TrackPoint.Get<System.Double>("latitude"));
-                                    _Map.Points.Add(Point);
                                 }
                             }
                         }
                         _Tracks.Add(Track);
-                        Track.Map((One, Two) => Two.Add("altitude-difference-before", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
-                        Track.First.Add("altitude-difference-before", 0.0);
-                        Track.Map((One, Two) => One.Add("altitude-difference-after", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
-                        Track.Last.Add("altitude-difference-after", 0.0);
-                        Track.AddField("altitude-difference", "altitude-difference-before", "altitude-difference-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
+                        Track.Map((One, Two) => Two.Add("slope-before", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
+                        Track.First.Add("slope-before", 0.0);
+                        Track.Map((One, Two) => One.Add("slope-after", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
+                        Track.Last.Add("slope-after", 0.0);
+                        Track.AddField("slope", "slope-before", "slope-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
                     }
                     else if(OpenFileDialog.FileName.EndsWith(".kml") == true)
                     {
                         var KML = GPS.KML.Version_2_2.KML.ReadFromStream(Stream);
-                        var Track = new Mapper.Track();
 
                         foreach(var Placemark in KML.Placemarks)
                         {
+                            var Track = new Mapper.Track();
+
+                            Track.DrawLines = true;
                             if(Placemark.Name != null)
                             {
                                 Track.Name = Placemark.Name;
                             }
                             if(Placemark.LineString != null)
                             {
-                                Records.Record LastTrackPoint = null;
 
                                 foreach(var Coordinates in Placemark.LineString.Coordinates)
                                 {
@@ -285,25 +304,16 @@
                                     {
                                         TrackPoint.Add("altitude", Coordinates.Altitude);
                                     }
+                                    TrackPoint.Add("size", 5.0f);
+                                    TrackPoint.Add("color", System.Drawing.Color.Black);
                                     Track.Append(TrackPoint);
-                                    if(LastTrackPoint != null)
-                                    {
-                                        var Line = new System.Windows.Forms.DataMap.Line();
-
-                                        Line.Object = new System.Pair<Records.Record, Records.Record>(LastTrackPoint, TrackPoint);
-                                        Line.Color = System.Drawing.Color.FromArgb(180, 0, 0, 0);
-                                        Line.BeginGeoLocation = new System.Point(LastTrackPoint.Get<System.Double>("longitude"), LastTrackPoint.Get<System.Double>("latitude"));
-                                        Line.EndGeoLocation = new System.Point(TrackPoint.Get<System.Double>("longitude"), TrackPoint.Get<System.Double>("latitude"));
-                                        _Map.Lines.Add(Line);
-                                    }
-                                    LastTrackPoint = TrackPoint;
                                 }
                             }
+                            _Tracks.Add(Track);
                         }
-                        _Tracks.Add(Track);
                     }
                 }
-                _Map.Refresh();
+                _RebuildDataMap();
             }
         }
 
@@ -319,10 +329,10 @@
 
         private void _UpdateCoordinatesLabel(System.Point GeoLocation)
         {
-            _CoordinatesLabel.Text = _GetGeoCoordinates(GeoLocation);
+            _CoordinatesLabel.Text = _GetGeoCoordinateString(GeoLocation);
         }
 
-        private static System.String _GetGeoCoordinates(System.Point GeoLocation)
+        private static System.String _GetGeoCoordinateString(System.Point GeoLocation)
         {
             var Longitude = System.Windows.Forms.Map.GetLongitudeCoordinatesFromLongitudeLocation(GeoLocation.X);
             var Latitude = System.Windows.Forms.Map.GetLongitudeCoordinatesFromLongitudeLocation(GeoLocation.Y);
@@ -335,82 +345,126 @@
             return System.Drawing.Color.FromArgb((Low.R + ((High.R - Low.R) * Fraction)).GetTruncatedAsInt32(), (Low.G + ((High.G - Low.G) * Fraction)).GetTruncatedAsInt32(), (Low.B + ((High.B - Low.B) * Fraction)).GetTruncatedAsInt32());
         }
 
-        private void _ColourByColourFunction(System.Func<Records.Record, System.Drawing.Color> ColourFunction)
+        private void _RebuildDataMap()
         {
+            _Map.Points.Clear();
+            _Map.Lines.Clear();
             foreach(var Track in _Tracks)
             {
+                Records.Record LastTrackPoint = null;
+
                 foreach(var TrackPoint in Track)
                 {
                     var Point = new System.Windows.Forms.DataMap.Point();
 
                     Point.Object = TrackPoint;
-                    Point.Color = ColourFunction(TrackPoint);
+                    Point.Color = TrackPoint.Get<System.Drawing.Color>("color");
+                    Point.Size = TrackPoint.Get<System.Single>("size");
                     Point.GeoLocation = new System.Point(TrackPoint.Get<System.Double>("longitude"), TrackPoint.Get<System.Double>("latitude"));
                     _Map.Points.Add(Point);
+                    if((Track.DrawLines == true) && (LastTrackPoint != null))
+                    {
+                        var Line = new System.Windows.Forms.DataMap.Line();
+
+                        Line.Object = new System.Pair<Records.Record, Records.Record>(LastTrackPoint, TrackPoint);
+                        Line.Color = System.Drawing.Color.Black;
+                        Line.Width = 2.0f;
+                        Line.BeginGeoLocation = new System.Point(LastTrackPoint.Get<System.Double>("longitude"), LastTrackPoint.Get<System.Double>("latitude"));
+                        Line.EndGeoLocation = new System.Point(TrackPoint.Get<System.Double>("longitude"), TrackPoint.Get<System.Double>("latitude"));
+                        _Map.Lines.Add(Line);
+                    }
+                    LastTrackPoint = TrackPoint;
                 }
+            }
+            _Map.Refresh();
+        }
+
+        private void _ColorByColourFunction(Mapper.Track Track, System.Func<Records.Record, System.Drawing.Color> ColourFunction)
+        {
+            foreach(var TrackPoint in Track)
+            {
+                TrackPoint.Update("color", ColourFunction(TrackPoint));
             }
         }
 
-        private void _ColourByPropertyAndMinimumMaximum(System.String PropertyName, System.Double Minimum, System.Double Maximum)
+        private void _ColorByPropertyAndMinimumMaximum(Mapper.Track Track, System.String PropertyName, System.Double Minimum, System.Double Maximum)
         {
             if(Minimum == Maximum)
             {
                 Maximum = Maximum + 1;
             }
-            _ColourByColourFunction(Record => _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (Record.Get<System.Double>(PropertyName) - Minimum) / (Maximum - Minimum)));
+            _ColorByColourFunction(Track, Record => _Mix(System.Drawing.Color.Red, System.Drawing.Color.Yellow, (Record.Get<System.Double>(PropertyName) - Minimum) / (Maximum - Minimum)));
         }
 
-        private void _ColourBlackMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
-        {
-            _Map.Points.Clear();
-            _ColourByColourFunction(Record => System.Drawing.Color.Black);
-            _Map.Refresh();
-        }
-
-        private void _GetMinimumAndMaximum(System.String PropertyName, ref System.Double Minimum, ref System.Double Maximum)
+        private void _GetMinimumAndMaximum(Mapper.Track Track, System.String PropertyName, ref System.Double Minimum, ref System.Double Maximum)
         {
             Minimum = System.Double.MaxValue;
             Maximum = System.Double.MinValue;
-            foreach(var Track in _Tracks)
+            foreach(var TrackPoint in Track)
             {
-                foreach(var TrackPoint in Track)
+                if(TrackPoint.Get<System.Double>(PropertyName) > Maximum)
                 {
-                    if(TrackPoint.Get<System.Double>(PropertyName) > Maximum)
-                    {
-                        Maximum = TrackPoint.Get<System.Double>(PropertyName);
-                    }
-                    if(TrackPoint.Get<System.Double>(PropertyName) < Minimum)
-                    {
-                        Minimum = TrackPoint.Get<System.Double>(PropertyName);
-                    }
+                    Maximum = TrackPoint.Get<System.Double>(PropertyName);
+                }
+                if(TrackPoint.Get<System.Double>(PropertyName) < Minimum)
+                {
+                    Minimum = TrackPoint.Get<System.Double>(PropertyName);
                 }
             }
         }
 
-        private void _ColourByProperty(System.String PropertyName)
+        private void _ColorByProperty(Mapper.Track Track, System.String PropertyName)
         {
             var Minimum = System.Double.MaxValue;
             var Maximum = System.Double.MinValue;
 
-            _GetMinimumAndMaximum(PropertyName, ref Minimum, ref Maximum);
-            _Map.Points.Clear();
-            _ColourByPropertyAndMinimumMaximum(PropertyName, Minimum, Maximum);
-            _Map.Refresh();
+            _GetMinimumAndMaximum(Track, PropertyName, ref Minimum, ref Maximum);
+            _ColorByPropertyAndMinimumMaximum(Track, PropertyName, Minimum, Maximum);
         }
 
-        private void _ColourBySpeedMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
+        private void _ColorTracksByProperty(System.Collections.Generic.List<Mapper.Track> Tracks, System.String PropertyName)
         {
-            _ColourByProperty("speed");
+            foreach(var Track in _Tracks)
+            {
+                _ColorByProperty(Track, PropertyName);
+            }
         }
 
-        private void _ColourByAltitudeMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
+        private void _OnColorBlackMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
         {
-            _ColourByProperty("altitude");
+            foreach(var Track in _Tracks)
+            {
+                _ColorByColourFunction(Track, Record => System.Drawing.Color.Black);
+            }
+            _RebuildDataMap();
         }
 
-        private void _ColourByAltitudeDifferenceMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
+        private void _OnColorBySpeedMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
         {
-            _ColourByProperty("altitude-difference");
+            _ColorTracksByProperty(_Tracks, "speed");
+            _RebuildDataMap();
+        }
+
+        private void _OnColorByAltitudeMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
+        {
+            _ColorTracksByProperty(_Tracks, "altitude");
+            _RebuildDataMap();
+        }
+
+        private void _OnColorBySlopeMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
+        {
+            _ColorTracksByProperty(_Tracks, "slope");
+            _RebuildDataMap();
+        }
+
+        private void _OnOpacityTrackbarScrolled(System.Object Sender, System.EventArgs EventArguments)
+        {
+            _Map.Opacity = _OpacityTrackbar.Value / 100.0f;
+        }
+
+        private void _OnOpacityTrackbarFocusEntered(System.Object Sender, System.EventArgs EventArguments)
+        {
+            _Map.Focus();
         }
     }
 }

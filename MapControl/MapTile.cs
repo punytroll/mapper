@@ -71,16 +71,20 @@
 
         public void SetImage(System.Drawing.Image Image)
         {
-            if(Image != _Image)
+            if(Image != null)
             {
-                _Image = Image;
+                _Image = Image.ConvertToPixelFormat(System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            }
+            else
+            {
+                _Image = null;
+            }
 
-                var Delegate = ImageChanged;
+            var Delegate = ImageChanged;
 
-                if(Delegate != null)
-                {
-                    Delegate();
-                }
+            if(Delegate != null)
+            {
+                Delegate();
             }
         }
 

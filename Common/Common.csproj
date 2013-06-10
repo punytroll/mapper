@@ -48,13 +48,15 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="Pair.cs" />
+    <Compile Include="System.Pair.cs" />
     <Compile Include="System.Double.cs" />
+    <Compile Include="System.Drawing.Image.cs" />
     <Compile Include="System.Single.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
   </ItemGroup>
 </Project>
