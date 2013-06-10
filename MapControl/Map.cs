@@ -311,7 +311,7 @@
         {
             var PixelLocation = GetPixelLocationFromScreenLocation(ScreenLocation);
 
-            return (PixelLocation.X >= 0) && (PixelLocation.Y >= 0) && (PixelLocation.X < (1 << _Zoom)) && (PixelLocation.Y < (1 << _Zoom));
+            return (PixelLocation.X >= 0) && (PixelLocation.Y >= 0) && (PixelLocation.X < _MapProvider.GetTileSize() * (1 << _Zoom)) && (PixelLocation.Y < _MapProvider.GetTileSize() * (1 << _Zoom));
         }
 
         public void SetZoom(System.Int32 Zoom)
@@ -340,9 +340,19 @@
             return Latitude / 180.0 * System.Math.PI;
         }
 
-        public static System.Double GetongitudeLocationFromLongitudeCoordinates(System.Double Longitude)
+        public static System.Double GetLongitudeLocationFromLongitudeCoordinates(System.Double Longitude)
         {
             return Longitude / 180.0 * System.Math.PI;
+        }
+
+        public static System.Double GetLatitudeCoordinatesFromLatitudeLocation(System.Double Latitude)
+        {
+            return Latitude * 180.0 / System.Math.PI;
+        }
+
+        public static System.Double GetLongitudeCoordinatesFromLongitudeLocation(System.Double Longitude)
+        {
+            return Longitude * 180.0 / System.Math.PI;
         }
 
         public static System.Point GetGeoLocationFromGeoCoordinates(System.Double Latitude, System.Double Longitude)

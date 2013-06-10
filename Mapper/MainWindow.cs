@@ -9,12 +9,12 @@
         private System.Windows.Forms.ToolStripMenuItem bySpeedToolStripMenuItem;
         private System.Drawing.Point? _MapControlDragPoint;
         private System.Windows.Forms.ToolStripMenuItem _ColourByAltitudeDifferenceMenuItem;
-        private readonly System.Collections.Generic.List<Records.Records> _Records;
+        private readonly System.Collections.Generic.List<Mapper.Track> _Tracks;
 
         public MainWindow()
         {
             InitializeComponent();
-            _Records = new System.Collections.Generic.List<Records.Records>();
+            _Tracks = new System.Collections.Generic.List<Mapper.Track>();
             _Map.MapProvider = new System.Windows.Forms.MapProvider();
             _Map.MapProvider.TileDownloader = new System.Windows.Forms.MapnikDownloader();
             _Map.MapProvider.HarddriveCache = new System.ImageHarddriveCache();
@@ -228,75 +228,79 @@
                     if(OpenFileDialog.FileName.EndsWith(".gpx") == true)
                     {
                         var GPX = GPS.GPX.DOM10.GPX.ReadFromStream(Stream);
-                        var Records = new Records.Records();
+                        var Track = new Mapper.Track();
 
-                        foreach(var Track in GPX.Tracks)
+                        foreach(var GPXTrack in GPX.Tracks)
                         {
-                            foreach(var TrackSegment in Track.TrackSegments)
+                            foreach(var GPXTrackSegment in GPXTrack.TrackSegments)
                             {
-                                foreach(var TrackPoint in TrackSegment.TrackPoints)
+                                foreach(var GPXTrackPoint in GPXTrackSegment.TrackPoints)
                                 {
-                                    var Record = new Records.Record();
+                                    var TrackPoint = new Records.Record();
 
-                                    Record.Add("latitude", System.Windows.Forms.Map.GetLatitudeLocationFromLatitudeCoordinates(TrackPoint.Latitude));
-                                    Record.Add("longitude", System.Windows.Forms.Map.GetongitudeLocationFromLongitudeCoordinates(TrackPoint.Longitude));
-                                    Record.Add("altitude", TrackPoint.Elevation);
-                                    Record.Add("speed", TrackPoint.Speed);
-                                    Records.Append(Record);
+                                    TrackPoint.Add("latitude", System.Windows.Forms.Map.GetLatitudeLocationFromLatitudeCoordinates(GPXTrackPoint.Latitude));
+                                    TrackPoint.Add("longitude", System.Windows.Forms.Map.GetLongitudeLocationFromLongitudeCoordinates(GPXTrackPoint.Longitude));
+                                    TrackPoint.Add("altitude", GPXTrackPoint.Elevation);
+                                    TrackPoint.Add("speed", GPXTrackPoint.Speed);
+                                    Track.Append(TrackPoint);
 
                                     var Point = new System.Windows.Forms.DataMap.Point();
 
-                                    Point.Object = Record;
+                                    Point.Object = TrackPoint;
                                     Point.Color = System.Drawing.Color.Black;
-                                    Point.GeoLocation = new System.Point(Record.Get<System.Double>("longitude"), Record.Get<System.Double>("latitude"));
+                                    Point.GeoLocation = new System.Point(TrackPoint.Get<System.Double>("longitude"), TrackPoint.Get<System.Double>("latitude"));
                                     _Map.Points.Add(Point);
                                 }
                             }
                         }
-                        _Records.Add(Records);
-                        Records.Map((One, Two) => Two.Add("altitude-difference-before", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
-                        Records.First.Add("altitude-difference-before", 0.0);
-                        Records.Map((One, Two) => One.Add("altitude-difference-after", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
-                        Records.Last.Add("altitude-difference-after", 0.0);
-                        Records.AddField("altitude-difference", "altitude-difference-before", "altitude-difference-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
+                        _Tracks.Add(Track);
+                        Track.Map((One, Two) => Two.Add("altitude-difference-before", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
+                        Track.First.Add("altitude-difference-before", 0.0);
+                        Track.Map((One, Two) => One.Add("altitude-difference-after", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
+                        Track.Last.Add("altitude-difference-after", 0.0);
+                        Track.AddField("altitude-difference", "altitude-difference-before", "altitude-difference-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
                     }
                     else if(OpenFileDialog.FileName.EndsWith(".kml") == true)
                     {
                         var KML = GPS.KML.Version_2_2.KML.ReadFromStream(Stream);
-                        var Records = new Records.Records();
+                        var Track = new Mapper.Track();
 
                         foreach(var Placemark in KML.Placemarks)
                         {
+                            if(Placemark.Name != null)
+                            {
+                                Track.Name = Placemark.Name;
+                            }
                             if(Placemark.LineString != null)
                             {
-                                Records.Record LastRecord = null;
+                                Records.Record LastTrackPoint = null;
 
                                 foreach(var Coordinates in Placemark.LineString.Coordinates)
                                 {
-                                    var Record = new Records.Record();
+                                    var TrackPoint = new Records.Record();
 
-                                    Record.Add("latitude", System.Windows.Forms.Map.GetLatitudeLocationFromLatitudeCoordinates(Coordinates.Latitude));
-                                    Record.Add("longitude", System.Windows.Forms.Map.GetongitudeLocationFromLongitudeCoordinates(Coordinates.Longitude));
+                                    TrackPoint.Add("latitude", System.Windows.Forms.Map.GetLatitudeLocationFromLatitudeCoordinates(Coordinates.Latitude));
+                                    TrackPoint.Add("longitude", System.Windows.Forms.Map.GetLongitudeLocationFromLongitudeCoordinates(Coordinates.Longitude));
                                     if(Coordinates.Altitude != null)
                                     {
-                                        Record.Add("altitude", Coordinates.Altitude);
+                                        TrackPoint.Add("altitude", Coordinates.Altitude);
                                     }
-                                    Records.Append(Record);
-                                    if(LastRecord != null)
+                                    Track.Append(TrackPoint);
+                                    if(LastTrackPoint != null)
                                     {
                                         var Line = new System.Windows.Forms.DataMap.Line();
 
-                                        Line.Object = new System.Pair<Records.Record, Records.Record>(LastRecord, Record);
+                                        Line.Object = new System.Pair<Records.Record, Records.Record>(LastTrackPoint, TrackPoint);
                                         Line.Color = System.Drawing.Color.FromArgb(180, 0, 0, 0);
-                                        Line.BeginGeoLocation = new System.Point(LastRecord.Get<System.Double>("longitude"), LastRecord.Get<System.Double>("latitude"));
-                                        Line.EndGeoLocation = new System.Point(Record.Get<System.Double>("longitude"), Record.Get<System.Double>("latitude"));
+                                        Line.BeginGeoLocation = new System.Point(LastTrackPoint.Get<System.Double>("longitude"), LastTrackPoint.Get<System.Double>("latitude"));
+                                        Line.EndGeoLocation = new System.Point(TrackPoint.Get<System.Double>("longitude"), TrackPoint.Get<System.Double>("latitude"));
                                         _Map.Lines.Add(Line);
                                     }
-                                    LastRecord = Record;
+                                    LastTrackPoint = TrackPoint;
                                 }
                             }
                         }
-                        _Records.Add(Records);
+                        _Tracks.Add(Track);
                     }
                 }
                 _Map.Refresh();
@@ -320,10 +324,10 @@
 
         private static System.String _GetGeoCoordinates(System.Point GeoLocation)
         {
-            var Longitude = GeoLocation.X * 180.0 / System.Math.PI;
-            var Latitude = GeoLocation.Y * 180.0 / System.Math.PI;
+            var Longitude = System.Windows.Forms.Map.GetLongitudeCoordinatesFromLongitudeLocation(GeoLocation.X);
+            var Latitude = System.Windows.Forms.Map.GetLongitudeCoordinatesFromLongitudeLocation(GeoLocation.Y);
 
-            return Latitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Latitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Latitude > 0) ? ("N") : ("S")) + ", " + Longitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Longitude.GetFraction() / 100.0 * 60000.0).GetTruncatedAsInt32() + "’ " + ((Longitude > 0) ? ("O") : ("W"));
+            return Latitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Latitude.GetFraction() * 600000.0).GetTruncatedAsInt32() + "’ " + ((Latitude > 0) ? ("N") : ("S")) + ", " + Longitude.GetTruncatedAsInt32() + "° " + System.Math.Abs(Longitude.GetFraction() * 600000.0).GetTruncatedAsInt32() + "’ " + ((Longitude > 0) ? ("O") : ("W"));
         }
 
         private static System.Drawing.Color _Mix(System.Drawing.Color Low, System.Drawing.Color High, System.Double Fraction)
@@ -333,15 +337,15 @@
 
         private void _ColourByColourFunction(System.Func<Records.Record, System.Drawing.Color> ColourFunction)
         {
-            foreach(var Records in _Records)
+            foreach(var Track in _Tracks)
             {
-                foreach(var Record in Records)
+                foreach(var TrackPoint in Track)
                 {
                     var Point = new System.Windows.Forms.DataMap.Point();
 
-                    Point.Object = Record;
-                    Point.Color = ColourFunction(Record);
-                    Point.GeoLocation = new System.Point(Record.Get<System.Double>("longitude"), Record.Get<System.Double>("latitude"));
+                    Point.Object = TrackPoint;
+                    Point.Color = ColourFunction(TrackPoint);
+                    Point.GeoLocation = new System.Point(TrackPoint.Get<System.Double>("longitude"), TrackPoint.Get<System.Double>("latitude"));
                     _Map.Points.Add(Point);
                 }
             }
@@ -367,17 +371,17 @@
         {
             Minimum = System.Double.MaxValue;
             Maximum = System.Double.MinValue;
-            foreach(var Records in _Records)
+            foreach(var Track in _Tracks)
             {
-                foreach(var Record in Records)
+                foreach(var TrackPoint in Track)
                 {
-                    if(Record.Get<System.Double>(PropertyName) > Maximum)
+                    if(TrackPoint.Get<System.Double>(PropertyName) > Maximum)
                     {
-                        Maximum = Record.Get<System.Double>(PropertyName);
+                        Maximum = TrackPoint.Get<System.Double>(PropertyName);
                     }
-                    if(Record.Get<System.Double>(PropertyName) < Minimum)
+                    if(TrackPoint.Get<System.Double>(PropertyName) < Minimum)
                     {
-                        Minimum = Record.Get<System.Double>(PropertyName);
+                        Minimum = TrackPoint.Get<System.Double>(PropertyName);
                     }
                 }
             }

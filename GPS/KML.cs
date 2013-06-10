@@ -108,11 +108,21 @@ namespace GPS.KML.Version_2_2
             }
         }
 
+        public String Name
+        {
+            get
+            {
+                return _Name;
+            }
+        }
+
         private LineString _LineString;
+        private String _Name;
 
         private Placemark()
         {
             _LineString = null;
+            _Name = null;
         }
 
         public static Placemark ReadFromPlacemarkElement(XmlElement PlacemarkElement)
@@ -124,6 +134,10 @@ namespace GPS.KML.Version_2_2
                 if((ChildNode.NodeType == XmlNodeType.Element) && (ChildNode.Name == "LineString"))
                 {
                     Result._LineString = LineString.ReadFromLineStringElement((XmlElement)ChildNode);
+                }
+                else if((ChildNode.NodeType == XmlNodeType.Element) && (ChildNode.Name == "name"))
+                {
+                    Result._Name = ChildNode.InnerText;
                 }
             }
 

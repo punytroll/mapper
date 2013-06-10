@@ -75,6 +75,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Track.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
