@@ -5,6 +5,11 @@
         Records.Map(Record => Record.Update(FieldName, Action(Record.Get<FieldType>(FieldName))));
     }
 
+    public static void AddField<Type>(this Records.Records Records, System.String FieldName, Type FieldValue)
+    {
+        Records.Map(Record => Record.Add(FieldName, FieldValue));
+    }
+
     public static void AddField<ResultType, InputType1, InputType2>(this Records.Records Records, System.String ResultFieldName, System.String InputFieldName1, System.String InputFieldName2, System.Func<InputType1, InputType2, ResultType> Action)
     {
         Records.Map(Record => Record.Add(ResultFieldName, Action(Record.Get<InputType1>(InputFieldName1), Record.Get<InputType2>(InputFieldName2))));
