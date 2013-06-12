@@ -84,7 +84,13 @@
                     }
                     if(Image == null)
                     {
-                        Tile.ImageChanged += () => _StoreImageOnHarddrive(Tile);
+                        Tile.ImageChanged += delegate
+                        {
+                            if(Tile.Image != null)
+                            {
+                                _StoreImageOnHarddrive(Tile);
+                            }
+                        };
                         // here, a preliminary tile image could be calculated from other zoom levels
                         _TileDownloader.FetchTile(Tile);
                     }
