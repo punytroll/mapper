@@ -402,13 +402,16 @@
             Maximum = System.Double.MinValue;
             foreach(var TrackPoint in Track)
             {
-                if(TrackPoint.Get<System.Double>(PropertyName) > Maximum)
+                if(TrackPoint.Has(PropertyName) == true)
                 {
-                    Maximum = TrackPoint.Get<System.Double>(PropertyName);
-                }
-                if(TrackPoint.Get<System.Double>(PropertyName) < Minimum)
-                {
-                    Minimum = TrackPoint.Get<System.Double>(PropertyName);
+                    if(TrackPoint.Get<System.Double>(PropertyName) > Maximum)
+                    {
+                        Maximum = TrackPoint.Get<System.Double>(PropertyName);
+                    }
+                    if(TrackPoint.Get<System.Double>(PropertyName) < Minimum)
+                    {
+                        Minimum = TrackPoint.Get<System.Double>(PropertyName);
+                    }
                 }
             }
         }
