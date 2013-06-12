@@ -31,7 +31,7 @@
             System.Windows.Forms.ToolStripMenuItem _ColorBlackMenuItem;
             System.Windows.Forms.ToolStripMenuItem _ColorBySpeedMenuItem;
             System.Windows.Forms.ToolStripMenuItem _ColorByAltitudeMenuItem;
-            System.Windows.Forms.ToolStripMenuItem _ColorBySlopeMenuItem;
+            System.Windows.Forms.ToolStripMenuItem _ColorByAltitudeDifferenceMenuItem;
             this._ZoomLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._CoordinatesLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._ColoringMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
@@ -43,7 +43,7 @@
             _ColorBlackMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             _ColorBySpeedMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             _ColorByAltitudeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            _ColorBySlopeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            _ColorByAltitudeDifferenceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             _StatusBar.SuspendLayout();
             _MenuBar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._OpacityTrackbar)).BeginInit();
@@ -99,7 +99,7 @@
             _ColorBlackMenuItem,
             _ColorBySpeedMenuItem,
             _ColorByAltitudeMenuItem,
-            _ColorBySlopeMenuItem});
+            _ColorByAltitudeDifferenceMenuItem});
             this._ColoringMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             this._ColoringMenuItem.Name = "_ColoringMenuItem";
             this._ColoringMenuItem.Size = new System.Drawing.Size(66, 22);
@@ -128,10 +128,10 @@
             // 
             // _ColorBySlopeMenuItem
             // 
-            _ColorBySlopeMenuItem.Name = "_ColorBySlopeMenuItem";
-            _ColorBySlopeMenuItem.Size = new System.Drawing.Size(152, 22);
-            _ColorBySlopeMenuItem.Text = "by Slope";
-            _ColorBySlopeMenuItem.Click += new System.EventHandler(this._OnColorBySlopeMenuItemClicked);
+            _ColorByAltitudeDifferenceMenuItem.Name = "_ColorByAltitudeDifferenceMenuItem";
+            _ColorByAltitudeDifferenceMenuItem.Size = new System.Drawing.Size(152, 22);
+            _ColorByAltitudeDifferenceMenuItem.Text = "by Altitude Difference";
+            _ColorByAltitudeDifferenceMenuItem.Click += new System.EventHandler(this._OnColorByAltitudeDifferenceMenuItemClicked);
             // 
             // _OpacityTrackbar
             // 
@@ -272,11 +272,11 @@
                             }
                         }
                         _Tracks.Add(Track);
-                        Track.Map((One, Two) => Two.Add("slope-before", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
-                        Track.First.Add("slope-before", 0.0);
-                        Track.Map((One, Two) => One.Add("slope-after", Two.Get<System.Double>("altitude") - One.Get<System.Double>("altitude")));
-                        Track.Last.Add("slope-after", 0.0);
-                        Track.AddField("slope", "slope-before", "slope-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
+                        Track.AddField("altitude-difference-before", 0.0);
+                        Track.AddField("altitude-difference-after", 0.0);
+                        Track.UpdateFieldOfSecondOfPair<System.Double, System.Double>("altitude-difference-before", "altitude", (One, Two) => Two - One);
+                        Track.UpdateFieldOfFirstOfPair<System.Double, System.Double>("altitude-difference-after", "altitude", (One, Two) => Two - One);
+                        Track.AddField("altitude-difference", "altitude-difference-before", "altitude-difference-after", (System.Double Before, System.Double After) => (Before + After) / 2.0);
                     }
                     else if(OpenFileDialog.FileName.EndsWith(".kml") == true)
                     {
@@ -454,9 +454,9 @@
             _RebuildDataMap();
         }
 
-        private void _OnColorBySlopeMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
+        private void _OnColorByAltitudeDifferenceMenuItemClicked(System.Object Sender, System.EventArgs EventArguments)
         {
-            _ColorTracksByProperty(_Tracks, "slope");
+            _ColorTracksByProperty(_Tracks, "altitude-difference");
             _RebuildDataMap();
         }
 
