@@ -5,6 +5,26 @@
         Records.Map(Record => Record.Update(FieldName, Action(Record.Get<FieldType>(FieldName))));
     }
 
+    public static void UpdateFieldOfFirstOfPair<OutputType, InputType1, InputType2>(this Records.Records Records, System.String OutputFieldName, System.String InputFieldName1, System.String InputFieldName2, System.Func<InputType1, InputType2, OutputType> Action)
+    {
+        Records.Map((One, Two) => One.Update(OutputFieldName, Action(One.Get<InputType1>(InputFieldName1), Two.Get<InputType2>(InputFieldName2))));
+    }
+
+    public static void UpdateFieldOfFirstOfPair<OutputType, InputType>(this Records.Records Records, System.String OutputFieldName, System.String InputFieldName, System.Func<InputType, InputType, OutputType> Action)
+    {
+        Records.Map((One, Two) => One.Update(OutputFieldName, Action(One.Get<InputType>(InputFieldName), Two.Get<InputType>(InputFieldName))));
+    }
+
+    public static void UpdateFieldOfSecondOfPair<OutputType, InputType1, InputType2>(this Records.Records Records, System.String OutputFieldName, System.String InputFieldName1, System.String InputFieldName2, System.Func<InputType1, InputType2, OutputType> Action)
+    {
+        Records.Map((One, Two) => Two.Update(OutputFieldName, Action(One.Get<InputType1>(InputFieldName1), Two.Get<InputType2>(InputFieldName2))));
+    }
+
+    public static void UpdateFieldOfSecondOfPair<OutputType, InputType>(this Records.Records Records, System.String OutputFieldName, System.String InputFieldName, System.Func<InputType, InputType, OutputType> Action)
+    {
+        Records.Map((One, Two) => Two.Update(OutputFieldName, Action(One.Get<InputType>(InputFieldName), Two.Get<InputType>(InputFieldName))));
+    }
+
     public static void AddField<Type>(this Records.Records Records, System.String FieldName, Type FieldValue)
     {
         Records.Map(Record => Record.Add(FieldName, FieldValue));
