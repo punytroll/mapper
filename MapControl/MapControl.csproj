@@ -52,9 +52,6 @@
     <Compile Include="DataMap.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="DebugCacheMap.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="ImageHarddriveCache.cs" />
     <Compile Include="ImageMemoryCache.cs" />
     <Compile Include="Map.cs">
