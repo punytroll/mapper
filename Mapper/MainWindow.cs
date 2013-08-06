@@ -215,7 +215,7 @@
 
         private void _OnMapControlMouseDown(System.Object Sender, System.Windows.Forms.MouseEventArgs EventArguments)
         {
-            if(EventArguments.Button == System.Windows.Forms.MouseButtons.Left)
+            if(EventArguments.Button == System.Windows.Forms.MouseButtons.Middle)
             {
                 _Map.Capture = true;
                 _MapControlDragPoint = EventArguments.Location;
@@ -224,7 +224,7 @@
 
         private void _OnMapControlMouseUp(System.Object Sender, System.Windows.Forms.MouseEventArgs EventArguments)
         {
-            if(EventArguments.Button == System.Windows.Forms.MouseButtons.Left)
+            if(EventArguments.Button == System.Windows.Forms.MouseButtons.Middle)
             {
                 _Map.Capture = false;
                 _MapControlDragPoint = null;
