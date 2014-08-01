@@ -155,7 +155,7 @@ namespace System.Windows.Forms
             _Points = new List<Point>();
         }
 
-        protected override void OnPaint(System.Windows.Forms.PaintEventArgs EventArguments)
+        protected override void OnPaint(PaintEventArgs EventArguments)
         {
             base.OnPaint(EventArguments);
             foreach(var Line in _Lines)

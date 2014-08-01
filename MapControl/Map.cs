@@ -1,4 +1,7 @@
-﻿namespace System.Windows.Forms
+﻿using System.Drawing;
+using System.Drawing.Imaging;
+
+namespace System.Windows.Forms
 {
     public class Map : System.Windows.Forms.Control
     {
@@ -370,31 +373,32 @@
             return Longitude * 180.0 / System.Math.PI;
         }
 
-        public static System.Point GetGeoLocationFromGeoCoordinates(System.Double Latitude, System.Double Longitude)
+        public static Point GetGeoLocationFromGeoCoordinates(Double Latitude, Double Longitude)
         {
-            return new System.Point(Longitude / 180.0 * System.Math.PI, Latitude / 180.0 * System.Math.PI);
+            return new Point(Longitude / 180.0 * Math.PI, Latitude / 180.0 * Math.PI);
         }
 
-        protected override void OnPaint(System.Windows.Forms.PaintEventArgs EventArguments)
+        protected override void OnPaint(PaintEventArgs EventArguments)
         {
             base.OnPaint(EventArguments);
 
-            var LoadingFont = new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 20, System.Drawing.FontStyle.Regular);
+            var LoadingFont = new Font(FontFamily.GenericSansSerif, 20, FontStyle.Regular);
 
             if(_MapProvider != null)
             {
-                var ColorMatrixValues = new System.Single[][] {
-                    new System.Single[] { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f },
-                    new System.Single[] { 0.0f, 1.0f, 0.0f, 0.0f, 0.0f },
-                    new System.Single[] { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f },
-                    new System.Single[] { 0.0f, 0.0f, 0.0f, _Opacity, 0.0f },
-                    new System.Single[] { 0.0f, 0.0f, 0.0f, 0.0f, 1.0f }
-                };
-                var ColorMatrix = new System.Drawing.Imaging.ColorMatrix(ColorMatrixValues);
-                var ImageAttributes = new System.Drawing.Imaging.ImageAttributes();
+                var ColorMatrixValues = new[]
+                                        {
+                                            new[] { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f },
+                                            new[] { 0.0f, 1.0f, 0.0f, 0.0f, 0.0f },
+                                            new[] { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f },
+                                            new[] { 0.0f, 0.0f, 0.0f, _Opacity, 0.0f },
+                                            new[] { 0.0f, 0.0f, 0.0f, 0.0f, 1.0f }
+                                        };
+                var ColorMatrix = new ColorMatrix(ColorMatrixValues);
+                var ImageAttributes = new ImageAttributes();
 
                 ImageAttributes.SetColorMatrix(ColorMatrix);
-                for(var X = System.Math.Max(0, -_TranslateX / _MapProvider.GetTileSize()); X * _MapProvider.GetTileSize() < Width - _TranslateX; ++X)
+                for(var X = Math.Max(0, -_TranslateX / _MapProvider.GetTileSize()); X * _MapProvider.GetTileSize() < Width - _TranslateX; ++X)
                 {
                     for(var Y = -_TranslateY / _MapProvider.GetTileSize(); Y * _MapProvider.GetTileSize() < Width - _TranslateY; ++Y)
                     {
@@ -406,15 +410,15 @@
                             {
                                 lock(Tile.Image)
                                 {
-                                    var DestinationRectangle = new System.Drawing.Rectangle(X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize(), _MapProvider.GetTileSize());
+                                    var DestinationRectangle = new Rectangle(X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize(), _MapProvider.GetTileSize());
 
-                                    EventArguments.Graphics.DrawImage(Tile.Image, DestinationRectangle, 0, 0, _MapProvider.GetTileSize(), _MapProvider.GetTileSize(), System.Drawing.GraphicsUnit.Pixel, ImageAttributes);
+                                    EventArguments.Graphics.DrawImage(Tile.Image, DestinationRectangle, 0, 0, _MapProvider.GetTileSize(), _MapProvider.GetTileSize(), GraphicsUnit.Pixel, ImageAttributes);
                                 }
                             }
                             else
                             {
-                                EventArguments.Graphics.FillRectangle(System.Drawing.Brushes.DimGray, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize() - 1, _MapProvider.GetTileSize() - 1);
-                                EventArguments.Graphics.DrawString("Loading ...", LoadingFont, System.Drawing.Brushes.Black, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY);
+                                EventArguments.Graphics.FillRectangle(Brushes.DimGray, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY, _MapProvider.GetTileSize() - 1, _MapProvider.GetTileSize() - 1);
+                                EventArguments.Graphics.DrawString("Loading ...", LoadingFont, Brushes.Black, X * _MapProvider.GetTileSize() + _TranslateX, Y * _MapProvider.GetTileSize() + _TranslateY);
                                 Tile.ImageChanged += () => Invoke(new MethodInvoker(Invalidate));
                             }
                         }
