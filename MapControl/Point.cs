@@ -2,10 +2,10 @@
 {
     public struct Point
     {
-        private System.Double _X;
-        private System.Double _Y;
+        private Double _X;
+        private Double _Y;
 
-        public System.Double X
+        public Double X
         {
             get
             {
@@ -17,7 +17,7 @@
             }
         }
 
-        public System.Double Y
+        public Double Y
         {
             get
             {
@@ -29,7 +29,7 @@
             }
         }
 
-        public Point(System.Double X, System.Double Y)
+        public Point(Double X, Double Y)
         {
             _X = X;
             _Y = Y;

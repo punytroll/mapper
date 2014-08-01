@@ -112,7 +112,7 @@
             }
         }
 
-        private void _StoreImageOnHarddrive(System.Windows.Forms.MapTile Tile)
+        private void _StoreImageOnHarddrive(MapTile Tile)
         {
             if(_HarddriveCache != null)
             {

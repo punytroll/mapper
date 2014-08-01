@@ -30,7 +30,7 @@ namespace GPS.KML.Version_2_2
             }
         }
 
-        private List<Coordinates> _Coordinates;
+        private readonly List<Coordinates> _Coordinates;
 
         private LineString()
         {
@@ -68,7 +68,7 @@ namespace GPS.KML.Version_2_2
             return Result;
         }
 
-        private static List<String> _GetTuples(String Text)
+        private static IEnumerable<String> _GetTuples(String Text)
         {
             var Result = new List<String>();
             String Tuple = null;
@@ -91,7 +91,6 @@ namespace GPS.KML.Version_2_2
             if(Tuple != null)
             {
                 Result.Add(Tuple);
-                Tuple = null;
             }
 
             return Result;
@@ -155,7 +154,7 @@ namespace GPS.KML.Version_2_2
             }
         }
 
-        private List<Placemark> _Placemarks;
+        private readonly List<Placemark> _Placemarks;
 
         private KML()
         {
@@ -164,7 +163,7 @@ namespace GPS.KML.Version_2_2
 
         public static KML ReadFromStream(Stream Stream)
         {
-            KML Result = null;
+            KML Result;
             var XMLDocument = new XmlDocument();
 
             XMLDocument.Load(Stream);
