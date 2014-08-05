@@ -22,6 +22,7 @@ namespace System.Windows.Forms
 
         public void FetchTile(MapTile Tile)
         {
+            System.Console.WriteLine("Queuing to download " + Tile.Zoom + ":" + Tile.X + "/" + Tile.Y + ".");
             OnTileDownloading(Tile);
             ThreadPool.QueueUserWorkItem(_DownloadTile, Tile);
         }
@@ -41,6 +42,7 @@ namespace System.Windows.Forms
             var Tile = Parameter as MapTile;
 
             Debug.Assert(Tile != null);
+            System.Console.WriteLine("Downloading " + Tile.Zoom + ":" + Tile.X + "/" + Tile.Y + ".");
             try
             {
                 var Request = WebRequest.Create(String.Format(_TileFormat, Tile.Zoom, Tile.X, Tile.Y)) as HttpWebRequest;
@@ -66,6 +68,7 @@ namespace System.Windows.Forms
                 Tile.SetImage(null);
             }
             OnTileDownloaded(Tile);
+            System.Console.WriteLine("Downloaded " + Tile.Zoom + ":" + Tile.X + "/" + Tile.Y + ".");
         }
     }
 }
