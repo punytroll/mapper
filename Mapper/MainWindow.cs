@@ -28,6 +28,7 @@ namespace Mapper
 
             var MapnikDownloader = new MapnikDownloader();
 
+			MapnikDownloader.Start();
             MapnikDownloader.OnTileDownloading += delegate
                                                   {
                                                       _TilesDownloading += 1;
