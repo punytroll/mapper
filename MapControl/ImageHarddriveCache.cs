@@ -1,8 +1,14 @@
-﻿namespace System
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Threading;
+
+namespace System
 {
     public class ImageHarddriveCache
     {
-        public System.String RootDirectory
+        public String RootDirectory
         {
             get
             {
@@ -14,60 +20,50 @@
             }
         }
 
-        private readonly System.Object _LocksLock;
-        private readonly System.Collections.Generic.Dictionary<System.String, System.Object> _Locks;
-        private System.String _RootDirectory;
+        private readonly Object _LocksLock;
+        private readonly Dictionary<String, Object> _Locks;
+        private String _RootDirectory;
 
         public ImageHarddriveCache()
         {
-            _LocksLock = new System.Object();
-            _Locks = new System.Collections.Generic.Dictionary<System.String, System.Object>();
+            _LocksLock = new Object();
+            _Locks = new Dictionary<String, Object>();
             _RootDirectory = null;
         }
-
-        public System.Drawing.Image LoadTileImage(System.Int32 Zoom, System.Int32 X, System.Int32 Y)
-        {
-            System.Drawing.Image Result = null;
-
+		
+		public String GetEntryPath(Int32 Zoom, Int32 X, Int32 Y)
+		{
             if(_RootDirectory != null)
             {
-                var Path = _RootDirectory;
-
-                if(System.IO.Directory.Exists(Path) == true)
-                {
-                    Path = System.IO.Path.Combine(Path, Zoom.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    if(System.IO.Directory.Exists(Path) == true)
-                    {
-                        Path = System.IO.Path.Combine(Path, X.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                        if(System.IO.Directory.Exists(Path) == true)
-                        {
-                            var Entry = Y.ToString(System.Globalization.CultureInfo.InvariantCulture) + ".png";
-
-                            if(IsExpired(Path, Entry) == false)
-                            {
-                                Path = System.IO.Path.Combine(Path, Entry);
-                                if(System.IO.File.Exists(Path) == true)
-                                {
-                                    Result = new System.Drawing.Bitmap(Path);
-                                }
-                            }
-                        }
-                    }
-                }
+				return Path.Combine(Path.Combine(Path.Combine(_RootDirectory, Zoom.ToString(CultureInfo.InvariantCulture)), X.ToString(CultureInfo.InvariantCulture)), Y.ToString(CultureInfo.InvariantCulture) + ".png");
             }
+			
+			return null;
+		}
 
-            return Result;
+        public Image LoadTileImage(Int32 Zoom, Int32 X, Int32 Y)
+        {
+			var EntryPath = GetEntryPath(Zoom, X, Y);
+			
+			if((EntryPath != null) && (File.Exists(EntryPath) == true))
+			{
+				return new Bitmap(EntryPath);
+			}
+			else
+			{
+				return null;
+			}
         }
 
-        private void LockDatabase(System.String Path)
+        private void LockDatabase(String Path)
         {
-            System.Object Lock;
+            Object Lock;
 
             lock(_LocksLock)
             {
                 if(_Locks.ContainsKey(Path) == false)
                 {
-                    Lock = new System.Object();
+                    Lock = new Object();
                     _Locks[Path] = Lock;
                 }
                 else
@@ -75,12 +71,12 @@
                     Lock = _Locks[Path];
                 }
             }
-            System.Threading.Monitor.Enter(Lock);
+            Monitor.Enter(Lock);
         }
 
-        private void ReleaseDatabase(System.String Path)
+        private void ReleaseDatabase(String Path)
         {
-            System.Object Lock = null;
+            Object Lock = null;
 
             lock(_LocksLock)
             {
@@ -91,24 +87,36 @@
             }
             if(Lock != null)
             {
-                System.Threading.Monitor.Exit(Lock);
+                Monitor.Exit(Lock);
             }
         }
+		
+		public Boolean IsExpired(Int32 Zoom, Int32 X, Int32 Y)
+		{
+			var Path = GetEntryPath(Zoom, X, Y);
+			
+			return IsExpired(Path);
+		}
+		
+		public Boolean IsExpired(String EntryPath)
+		{
+			return IsExpired(Path.GetDirectoryName(EntryPath), Path.GetFileName(EntryPath));
+		}
 
-        public System.Boolean IsExpired(System.String Path, System.String Entry)
+        public Boolean IsExpired(String DirectoryPath, String Entry)
         {
-            LockDatabase(Path);
+            LockDatabase(DirectoryPath);
 
             var Result = true;
-            var DatabasePath = System.IO.Path.Combine(Path, "expire.db");
+            var DatabasePath = Path.Combine(DirectoryPath, "expire.db");
 
-            if(System.IO.File.Exists(DatabasePath) == true)
+            if(File.Exists(DatabasePath) == true)
             {
-                using(var File = new System.IO.FileStream(DatabasePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.None))
+                using(var FileStream = new FileStream(DatabasePath, FileMode.Open, FileAccess.Read, FileShare.None))
                 {
-                    using(var Reader = new System.IO.StreamReader(File))
+                    using(var Reader = new StreamReader(FileStream))
                     {
-                        System.String Line;
+                        String Line;
 
                         while((Line = Reader.ReadLine()) != null)
                         {
@@ -118,14 +126,14 @@
                             {
                                 if(Parts[0] == Entry)
                                 {
-                                    Result = System.DateTime.Parse(Parts[1], System.Globalization.CultureInfo.InvariantCulture) < System.DateTime.Now;
+                                    Result = DateTime.Parse(Parts[1], CultureInfo.InvariantCulture) < DateTime.Now;
                                 }
                             }
                         }
                     }
                 }
             }
-            ReleaseDatabase(Path);
+            ReleaseDatabase(DirectoryPath);
 
             return Result;
         }

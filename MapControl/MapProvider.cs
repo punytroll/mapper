@@ -1,4 +1,6 @@
-﻿namespace System.Windows.Forms
+﻿using System.Drawing;
+
+namespace System.Windows.Forms
 {
     public class MapProvider
     {
@@ -76,13 +78,15 @@
                 {
                     CacheForZoom.Add(TileIndex, Tile);
 
-                    System.Drawing.Image Image = null;
+                    Image Image = null;
+					Boolean Load = true;
 
                     if(_HarddriveCache != null)
                     {
                         Image = _HarddriveCache.LoadTileImage(Zoom, X, Y);
+						Load = _HarddriveCache.IsExpired(Zoom, X, Y);
                     }
-                    if(Image == null)
+                    if(Load == true)
                     {
                         Tile.ImageChanged += delegate
                         {
