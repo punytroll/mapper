@@ -18,6 +18,6 @@ clean:
 	$(RM) $(EXECUTABLE)
 
 $(EXECUTABLE): $(SOURCE_FILES)
-	gmcs $^ $(patsubst %,-reference:%,$(ASSEMBLY_REFERENCES)) -out:$@
+	mcs $^ $(patsubst %,-reference:%,$(ASSEMBLY_REFERENCES)) -out:$@
 
 .PHONY: all all-here all-recursive
